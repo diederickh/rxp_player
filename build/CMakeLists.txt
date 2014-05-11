@@ -5,11 +5,14 @@ option(BUILD_EXAMPLES "Build examples" ON)
 include(${CMAKE_CURRENT_LIST_DIR}/Triplet.cmake)
 
 set(rxp_player "rxp_player")
+set(rxp_glfw_player "rxp_glfw_player")
+
 set(sd ${CMAKE_CURRENT_LIST_DIR}/../src/rxp_player/)
 set(bd ${CMAKE_CURRENT_LIST_DIR}/../)
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
   set(rxp_player "${rxp_player}_debug")
+  set(rxp_glfw_player "${rxp_glfw_player}_debug")
 endif()
 
 include_directories(
@@ -49,7 +52,6 @@ if(APPLE)
     ${extern_lib_dir}/libglfw3.a
     ${extern_lib_dir}/libuv.a
     ${extern_lib_dir}/libpng.a
-    ${extern_lib_dir}/libremoxly.a
     ${extern_lib_dir}/libtheora.a
     ${extern_lib_dir}/libogg.a
     ${extern_lib_dir}/libvorbis.a
@@ -65,7 +67,26 @@ if(APPLE)
     ${fr_audio_toolbox}
     -lz
     )
-
+elseif(UNIX)
+  set(app_libs
+    ${extern_lib_dir}
+    ${extern_lib_dir}/libglfw3.a
+    ${extern_lib_dir}/libpng.a
+    ${extern_lib_dir}/libtheora.a
+    ${extern_lib_dir}/libvorbis.a
+    ${extern_lib_dir}/libcubeb.a
+    ${extern_lib_dir}/libz.a
+    ${extern_lib_dir}/libogg.a
+    ${extern_lib_dir}/libuv.a
+    GL
+    X11
+    Xxf86vm
+    Xrandr
+    pthread
+    dl
+    Xi
+    asound
+    )
 endif()
 
 #add_executable(${app} ${app_sources})
@@ -76,9 +97,10 @@ if(UNIX AND NOT APPLE)
 endif()
 
 if(BUILD_EXAMPLES)
-  add_executable(rxp_glfw_player ${bd}/src/examples/rxp_player_glfw.cpp ${example_sources})
-  target_link_libraries(rxp_glfw_player ${rxp_player} ${app_libs})
-  install(TARGETS rxp_glfw_player DESTINATION bin)
+
+  add_executable(${rxp_glfw_player} ${bd}/src/examples/rxp_player_glfw.cpp ${example_sources})
+  target_link_libraries(${rxp_glfw_player} ${rxp_player} ${app_libs})
+  install(TARGETS ${rxp_glfw_player} DESTINATION bin)
   
   if(NOT EXISTS ${install_dir}/bin/big_buck_bunny_720p_stereo.ogg)
     message(STATUS "Downloading example video (only once).")

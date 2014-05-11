@@ -1,3 +1,4 @@
+#include <string.h>
 #include <rxp_player/rxp_player.h>
 
 /* ---------------------------------------------------------------- */
@@ -339,7 +340,7 @@ int rxp_player_fill_audio_buffer(rxp_player* player,
   int r = 0;
   uint32_t bytes_needed = 0;
 
-  rxp_player_lock(player);
+  //  rxp_player_lock(player);
   {
     if (player->state & RXP_PSTATE_PLAYING) {
       /* read audio */
@@ -357,7 +358,7 @@ int rxp_player_fill_audio_buffer(rxp_player* player,
       memset(buffer, 0x00, sizeof(float) * player->nchannels * nsamples);
     }
   }
-  rxp_player_unlock(player);
+  //  rxp_player_unlock(player);
 
   /*
     When r < 0, it means the audio buffer has ran out of bytes; 
@@ -558,6 +559,7 @@ static void rxp_player_on_audio(rxp_decoder* decoder, float** pcm, int nframes) 
   rxp_player* player = (rxp_player*)decoder->user;
 
   int needed = player->nchannels * nframes;
+
   if (needed > 4096) {
     printf("Error: our current tmp buffer is not big enough ...\n");
     exit(0);
@@ -566,12 +568,13 @@ static void rxp_player_on_audio(rxp_decoder* decoder, float** pcm, int nframes) 
   /* reformat the channels, the incoming data is not interleaved
      which we will do here. */
   int dx = 0;
-  for (int i = 0; i < nframes; ++i) {
-    for (int c = 0; c < player->nchannels; ++c) {
+  int i,c;
+  for (i = 0; i < nframes; ++i) {
+    for (c = 0; c < player->nchannels; ++c) {
       tmp[dx++] = pcm[c][i]; 
     }
   }
-
+ 
   rxp_player_lock(player);
   {
     player->total_audio_frames += nframes;
@@ -579,7 +582,7 @@ static void rxp_player_on_audio(rxp_decoder* decoder, float** pcm, int nframes) 
     rxp_ringbuffer_write(&player->audio_buffer, tmp, needed * sizeof(float));
   }
   rxp_player_unlock(player);
-
+  
   /* we need to tell the scheduler up till what pts we decoded */
   rxp_scheduler_update_decode_pts(&player->scheduler, pts);
 }

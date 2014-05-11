@@ -423,7 +423,7 @@ static int rxp_decoder_decode_vorbis(rxp_decoder* decoder, rxp_stream* stream, o
     }
     return 0;
   }
-  
+
   r = vorbis_synthesis(&v->block, packet);
   if (r != 0) {
     printf("Error: vorbis_synthesis failed: %d\n", r);

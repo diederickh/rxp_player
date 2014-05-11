@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <rxp_player/rxp_scheduler.h>
 
 /* ---------------------------------------------------------------- */
@@ -49,6 +50,7 @@ int rxp_scheduler_clear(rxp_scheduler* s) {
   s->decoded_pts = 0;
   s->played_pts = 0;
   s->state = RXP_SCHED_STATE_NONE;
+  s->thread = 0;
 
   uv_mutex_destroy(&s->mutex);
 
@@ -56,6 +58,7 @@ int rxp_scheduler_clear(rxp_scheduler* s) {
     printf("Error: cannot cleanup the task queue of the scheduler.\n");
     return -4;
   }
+
 
   return 0;
 }
@@ -71,8 +74,7 @@ int rxp_scheduler_init(rxp_scheduler* s) {
   s->play = NULL;
   s->stop = NULL;
   s->user = NULL;
-
-  s->thread = NULL;
+  s->thread = 0;
   s->goal_pts = 0;
   s->decoded_pts = 0;
   s->played_pts = 0;
@@ -91,7 +93,7 @@ int rxp_scheduler_init(rxp_scheduler* s) {
     s = NULL;
     return -3;
   }
-  
+
   return 0;
 }
 

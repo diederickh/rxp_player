@@ -338,6 +338,9 @@ static int setup_player() {
     printf("+ Error: cannot init player.\n");
     return -1;
   }
+
+  player.on_video_frame = on_video_frame;
+  player.on_event = on_event;
  
   std::string video = rx_get_exe_path() +"/big_buck_bunny_720p_stereo.ogg";
   if (rxp_player_open(&player, (char*)video.c_str()) < 0) {
@@ -349,9 +352,6 @@ static int setup_player() {
     printf("+ Error: failed to start playing.\n");
     return -3;
   }
-  
-  player.on_video_frame = on_video_frame;
-  player.on_event = on_event;
 
   return 0;
 }
@@ -434,6 +434,7 @@ static void on_event(rxp_player* p, int event) {
 
     /* check if this is a repeated call to start the audio stream */
     if (audio_ctx) {
+      cubeb_stream_stop(audio_stream);
       cubeb_stream_destroy(audio_stream);
       cubeb_destroy(audio_ctx);
       audio_ctx = NULL;
@@ -450,14 +451,12 @@ static void on_event(rxp_player* p, int event) {
   calling `rxp_player_fill_audio_buffer()`. 
   
   When `rxp_player_fill_audio_buffer()` returns < 0, it means there are no audio
-  sample left to be written. This is when we stop the audio stream.
+  sample left to be written. This is when the player will stop playback and trigger
+  the RXP_PLAYER_EVENT_RESET as soon as poaaible
 
  */
 static long audio_data_cb(cubeb_stream* stream, void* user, void* buffer, long nframes) {
-  /* make sure the player updates it's audio based clock */
-  if (rxp_player_fill_audio_buffer(&player, buffer, nframes) <  0) {
-    cubeb_stream_stop(stream);
-  };
+  rxp_player_fill_audio_buffer(&player, buffer, nframes);
   return nframes;
 }
 
