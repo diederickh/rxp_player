@@ -1,8 +1,7 @@
-rxp_player
-==========
+# rxp_player
 
- About
- -----
+
+## About
  
  While working on a project recently I stumbled upon a memory leak in   
  a quicktime based video player which I couldn't fix because the source 
@@ -18,8 +17,7 @@ rxp_player
  like installations. The glfw example contains all the code needed to create    
  a fully functional video player. 
  
- Usage
- -----
+## Usage
 
  - open a file: `rxp_player_open()`
  - start playing/decoding: `rxp_player_play()`
@@ -31,17 +29,16 @@ rxp_player
    playback and, if any, stop/destroy the audio stream. Also make sure to 
    call `rxp_player_clear()` to free all the used memory.
 
-   _For an example see the `rxp_player_glfw.cpp` file in the examples dir.
+   _For an example see the `rxp_player_glfw.cpp` file in the examples dir._
    
- Depenencies
- -----------
+## Depenencies
  
  *Depencies for the rxp_player library:*
 
  [libogg] for demuxing the ogg files  
  [libvorbis] for decoding the audio  
  [libtheora] for decoding video  
-
+ [libuv] for threading  
  
  *Dependencies for the example:*
 
@@ -51,8 +48,8 @@ rxp_player
  [tinylib][tinylib] for some handy GL functions  
 
 
- Lessons learned
- ---------------
+## Lessons learned
+
  This project was much about researching the whole video playback spectrum
  and how to create a video player which can playback ogg/vorbis/theora
  easily.  Some things I've learned:
@@ -148,15 +145,17 @@ rxp_player
    callback directly!
 
      
-Older versions
-----------
+## Older versions
+
  - Before first big cleanup https://gist.github.com/roxlu/8d95e8b8f40addfb399c
  - Before second big cleanup: https://gist.github.com/roxlu/803941f0657b2f561a20
 
 [libogg]: http://downloads.xiph.org/releases/ogg/libogg-1.3.1.tar.gz
 [libvorbis]: http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.4.tar.gz
 [libtheora]: http://downloads.xiph.org/releases/theora/libtheora-1.1.1.zip
+[libuv]: https://github.com/joyent/libuv/
 [cubeb]: https://github.com/kinetiknz/cubeb
 [glfw]: http://www.glfw.org/
 [glxw]: https://github.com/rikusalminen/glxw
 [tinylib]: https://github.com/roxlu/tinylib
+
