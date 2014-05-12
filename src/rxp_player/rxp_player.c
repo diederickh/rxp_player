@@ -340,7 +340,7 @@ int rxp_player_fill_audio_buffer(rxp_player* player,
   int r = 0;
   uint32_t bytes_needed = 0;
 
-  //  rxp_player_lock(player);
+  rxp_player_lock(player);
   {
     if (player->state & RXP_PSTATE_PLAYING) {
       /* read audio */
@@ -358,7 +358,7 @@ int rxp_player_fill_audio_buffer(rxp_player* player,
       memset(buffer, 0x00, sizeof(float) * player->nchannels * nsamples);
     }
   }
-  //  rxp_player_unlock(player);
+  rxp_player_unlock(player);
 
   /*
     When r < 0, it means the audio buffer has ran out of bytes; 
