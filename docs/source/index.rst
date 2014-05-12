@@ -6,7 +6,7 @@
 Cross Platform Video Player Library
 ===================================
 
-rxp_player is open source, cross platform C library for playing 
+rxp_player is an open source, cross platform C library for playing 
 back .ogg video files that are encoded with theora and vorbis. In the
 near future we will also add support for Daala and Opus. 
 
@@ -17,3 +17,4 @@ Contents:
 
    gettingstarted
    guide
+   api

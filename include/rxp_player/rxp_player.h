@@ -85,8 +85,8 @@ int rxp_player_stop(rxp_player* player);                                        
 int rxp_player_lock(rxp_player* player);                                                   /* whenever you need to use any of the internal members make sure to lock/unlock the player. */
 int rxp_player_unlock(rxp_player* player);                                                 /* unlock the player. */
 int rxp_player_fill_audio_buffer(rxp_player* player, void* buffer, uint32_t nsamples);     /* the user should call this from their audio callback. buffer must be an pointer to an array that can be filled with the pcm that the decoder generates, nframes is the number of frames one wants to fill, we will return 0 on success, -1 when you need to stop your audio stream */
-int rxp_player_is_playing(rxp_player* player);                                             /* returns 1 when the player is playing, else 0 or < 0 on error*/
-int rxp_player_is_paused(rxp_player* player);                                              /* returns 1 when player is paused, else 0 or < 0 on error */
+int rxp_player_is_playing(rxp_player* player);                                             /* returns 0 when the player is playing, else 1 or < 0 on error*/
+int rxp_player_is_paused(rxp_player* player);                                              /* returns 0 when player is paused, else 1 or < 0 on error */
 
 void rxp_player_update(rxp_player* player);                                                /* you should call this regularly so we can call e.g. `on_video_frame()` callback when needed. */
 

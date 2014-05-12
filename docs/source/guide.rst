@@ -17,23 +17,24 @@ big differences.
 
 A global flow of how to use the player is:
 
- * initialize a player with `rxp_player_init()`
- * open a file using `rxp_player_open()`
- * start playback with `rxp_player_play()`
+ * initialize a player with :func:`rxp_player_init()`
+ * open a file using :func:`rxp_player_open()`
+ * start playback with :func:`rxp_player_play()` 
+ * call :func:`rxp_player_update()` repeatedly in your draw loop.
  * release all used memory when you receive the `RXP_PLAYER_EVENT_RESET` 
-   by calling `rxp_player_clear()` in you `on_event` callback.
+   by calling :func:`rxp_player_clear()` in you `on_event` callback.
 
 Before you can use the player you need to initialize the `rxp_player`
 context which manages all memory, video, audio etc.. Call
-`rxp_player_init()` with a pointer to a `rxp_player` struct. All functions
+:func:`rxp_player_init()` with a pointer to a `rxp_player` struct. All functions
 of the `rxp_player` library return zero on sucess, < 0 on error, so make
 sure to check this. 
 
 After you've initialized the struct you can open a file by calling
-`rxp_player_open()` and pass the context struct and the filepath 
+:func:`rxp_player_open()` and pass the context struct and the filepath 
 to the .ogg file you want to play. 
 
-To start playing call `rxp_player_play()`. But by only calling 
+To start playing call :func:`rxp_player_play()`. But by only calling 
 these functions you're not yet there. You need to tell the `rxp_player`
 that you want to receive video frames. For this we use a callback, 
 that should accept a pointer to the player and a `rxp_packet`. 
@@ -97,9 +98,9 @@ certain player or decoder events happen. These events are:
    RXP_PLAYER_EVENT_RESET: 
           Whenever you receive the RXP_PLAYER_EVENT_RESET event 
           it's time to tear down the player and stop the audio 
-          stream if it was running. Call `rxp_player_clear()` when
+          stream if it was running. Call :func:`rxp_player_clear()` when
           you receive this event. This event is fired when either
-          you asked the player to stop by using `rxp_player_stop()`
+          you asked the player to stop by using :func:`rxp_player_stop()`
           or simply when we're ready decoding video frames or when 
           the audio buffer hasn't got any new samples that can be 
           played. 
@@ -107,7 +108,7 @@ certain player or decoder events happen. These events are:
 The function below shows an example that implements an event handler, which 
 also start an audio stream using the `cubeb`_ library. Note how we clear
 the used memory where we receive the `RXP_PLAYER_EVENT_RESET` event. When 
-you don't call `rxp_player_clear()` memory will leak.
+you don't call :func:`rxp_player_clear()` memory will leak.
 
 .. highlight:: c
 
