@@ -13,7 +13,7 @@ near future we will also add support for Daala and Opus.
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    gettingstarted
    guide
