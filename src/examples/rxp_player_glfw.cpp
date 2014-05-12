@@ -339,9 +339,6 @@ static int setup_player() {
     return -1;
   }
 
-  player.on_video_frame = on_video_frame;
-  player.on_event = on_event;
- 
   std::string video = rx_get_exe_path() +"/big_buck_bunny_720p_stereo.ogg";
   if (rxp_player_open(&player, (char*)video.c_str()) < 0) {
     printf("+ Error: cannot open the ogg file.\n");
@@ -352,6 +349,9 @@ static int setup_player() {
     printf("+ Error: failed to start playing.\n");
     return -3;
   }
+
+  player.on_video_frame = on_video_frame;
+  player.on_event = on_event;
 
   return 0;
 }

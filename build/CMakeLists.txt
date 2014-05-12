@@ -23,7 +23,6 @@ include_directories(
 )
 
 set(rxp_player_sources
-# ${sd}/test_glfw.cpp
   ${sd}/rxp_ringbuffer.c
   ${sd}/rxp_packets.c
   ${sd}/rxp_tasks.c
@@ -32,7 +31,6 @@ set(rxp_player_sources
   ${sd}/rxp_decoder.c
   ${sd}/rxp_player.c
 )
-
 
 add_library(${rxp_player} ${rxp_player_sources})
 
@@ -43,7 +41,6 @@ if(APPLE)
   find_library(fr_opengl OpenGL)
   find_library(fr_iokit IOKit)
   find_library(fr_corevideo CoreVideo)
-  find_library(fr_opencl OpenCL)
   find_library(fr_audio_unit AudioUnit)
   find_library(fr_core_audio CoreAudio)
   find_library(fr_audio_toolbox AudioToolbox)
@@ -61,7 +58,6 @@ if(APPLE)
     ${fr_opengl}
     ${fr_iokit}  
     ${fr_corevideo}
-    ${fr_opencl}
     ${fr_audio_unit}
     ${fr_core_audio}
     ${fr_audio_toolbox}
