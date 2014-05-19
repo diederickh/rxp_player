@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
+project(rxp_player)
+
 option(BUILD_EXAMPLES "Build examples" ON)
 
 include(${CMAKE_CURRENT_LIST_DIR}/Triplet.cmake)
@@ -15,6 +17,9 @@ if(NOT EXISTS ${bd}/extern)
   set(extern_url "http://www.github.com/roxlu/binaries/blob/master/video_capture/extern_video_capture_0.0.0.1.tar.gz?raw=true")
   set(extern_url "http://upload.roxlu.com/extern.tar.gz")
   file(DOWNLOAD "${extern_url}" ${bd}/extern/extern.tar.gz SHOW_PROGRESS TIMEOUT 300 STATUS status)
+endif()
+
+if (NOT EXISTS ${extern_lib_dir} AND EXISTS ${bd}/extern/extern.tar.gz)
   execute_process(COMMAND
      ${CMAKE_COMMAND} -E tar xzf ${bd}/extern/extern.tar.gz
      WORKING_DIRECTORY ${bd}/
