@@ -227,12 +227,12 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
          - pause
          - stop
       */
-      if(rxp_player_is_paused(&player) == 1) {
+      if(rxp_player_is_paused(&player) == 0) {
         if (rxp_player_play(&player) < 0) {
           printf("+ Failed to continue after pause.\n");
         }
       }
-      else if (rxp_player_is_playing(&player) != 1) {
+      else if (rxp_player_is_playing(&player) != 0) {
         setup_player();
       }
       else { 
@@ -244,7 +244,7 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
     }
     case GLFW_KEY_P: {
       /* Pause */
-      if (rxp_player_is_playing(&player) == 1) {
+      if (rxp_player_is_playing(&player) == 0) {
         if (rxp_player_pause(&player) < 0) {
           printf("+ Failed to pause the player.\n");
         }
@@ -256,7 +256,7 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
     }
     case GLFW_KEY_R: {
       /* Restart (used for some stress testing) */
-      if (rxp_player_is_playing(&player) == 1) {
+      if (rxp_player_is_playing(&player) == 0) {
         printf("+ Stop + Restart.\n");
         if (rxp_player_stop(&player) == 0) {
           setup_player();
@@ -339,9 +339,6 @@ static int setup_player() {
     return -1;
   }
 
-  player.on_video_frame = on_video_frame;
-  player.on_event = on_event;
- 
   std::string video = rx_get_exe_path() +"/big_buck_bunny_720p_stereo.ogg";
   if (rxp_player_open(&player, (char*)video.c_str()) < 0) {
     printf("+ Error: cannot open the ogg file.\n");
@@ -352,6 +349,9 @@ static int setup_player() {
     printf("+ Error: failed to start playing.\n");
     return -3;
   }
+
+  player.on_video_frame = on_video_frame;
+  player.on_event = on_event;
 
   return 0;
 }

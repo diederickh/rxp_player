@@ -1,4 +1,9 @@
 
+ TODO overall
+ -------------
+ 
+ - All functions need to return  < 0 on error, 0 on success 
+
  TODO rxp_scheduler
  ------------------
 

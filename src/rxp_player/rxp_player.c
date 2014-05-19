@@ -388,16 +388,16 @@ int rxp_player_fill_audio_buffer(rxp_player* player,
   return r;
 }
 
-/* returns 1 when playing, else 0, or < 0 on error */
+/* returns 0 when playing, else 1, or < 0 on error */
 int rxp_player_is_playing(rxp_player* p) {
   if (!p) { return -1; }
-  return (p->state & RXP_PSTATE_PLAYING) ? 1 : 0;
+  return (p->state & RXP_PSTATE_PLAYING) ? 0 : 1;
 }
 
-/* returns 1 when paused, else 0, or < 0 on error */
+/* returns 0 when paused, else 1, or < 0 on error */
 int rxp_player_is_paused(rxp_player* p) {
   if (!p) { return -1; }
-  return (p->state & RXP_PSTATE_PAUSED) ? 1 : 0;
+  return (p->state & RXP_PSTATE_PAUSED) ? 0 : 1;
 }
 
 /* ---------------------------------------------------------------- */
