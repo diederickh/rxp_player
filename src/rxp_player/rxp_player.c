@@ -146,9 +146,9 @@ int rxp_player_open(rxp_player* player, char* file) {
 
 int rxp_player_play(rxp_player* player) {
 
-  if (!player) { return -1; } 
-
   int state = 0;
+
+  if (!player) { return -1; } 
 
   /* get current state */
   rxp_player_lock(player);
@@ -183,10 +183,10 @@ int rxp_player_play(rxp_player* player) {
 
 int rxp_player_stop(rxp_player* player) {
 
-  if (!player) { return -1; } 
-
   int r = 0;
   int least_state = (RXP_PSTATE_PLAYING | RXP_PSTATE_PAUSED);
+
+  if (!player) { return -1; } 
 
   /* check if we're in the correct state */
   rxp_player_lock(player);
@@ -218,11 +218,11 @@ int rxp_player_stop(rxp_player* player) {
 }
 
 int rxp_player_pause(rxp_player* player) {
+
+  int r = 0;
    
   if (!player) { return -1; } 
 
-  int r = 0;
-  
   rxp_player_lock(player);
   {
     if (player->state != RXP_PSTATE_PLAYING) {
@@ -484,6 +484,7 @@ static int rxp_player_on_decode(rxp_scheduler* scheduler, uint64_t goalpts) {
 
 static void rxp_player_on_theora_frame(rxp_decoder* decoder, uint64_t pts, th_ycbcr_buffer buffer) {
   
+  int y_bytes, u_bytes, v_bytes, nbytes;
   rxp_player* p = (rxp_player*) decoder->user;
   rxp_packet* pkt = rxp_packet_queue_find_free_packet(&p->packets);
   
@@ -497,11 +498,11 @@ static void rxp_player_on_theora_frame(rxp_decoder* decoder, uint64_t pts, th_yc
     }
   }
 
-  int y_bytes = buffer[0].stride * buffer[0].height;
-  int u_bytes = buffer[1].stride * buffer[1].height;
-  int v_bytes = buffer[2].stride * buffer[2].height;
+  y_bytes = buffer[0].stride * buffer[0].height;
+  u_bytes = buffer[1].stride * buffer[1].height;
+  v_bytes = buffer[2].stride * buffer[2].height;
 
-  int nbytes = y_bytes + u_bytes + v_bytes;
+  nbytes = y_bytes + u_bytes + v_bytes;
 
   /* @todo: we should check if the nbytes is somewhat valid. */
   if (pkt->size < nbytes && !pkt->data) {
@@ -557,6 +558,8 @@ static void rxp_player_on_audio(rxp_decoder* decoder, float** pcm, int nframes) 
   static float tmp[4096] = { 0 } ;
   uint64_t pts  = 0;
   rxp_player* player = (rxp_player*)decoder->user;
+  int dx = 0;
+  int i,c;
 
   int needed = player->nchannels * nframes;
 
@@ -567,8 +570,6 @@ static void rxp_player_on_audio(rxp_decoder* decoder, float** pcm, int nframes) 
 
   /* reformat the channels, the incoming data is not interleaved
      which we will do here. */
-  int dx = 0;
-  int i,c;
   for (i = 0; i < nframes; ++i) {
     for (c = 0; c < player->nchannels; ++c) {
       tmp[dx++] = pcm[c][i]; 

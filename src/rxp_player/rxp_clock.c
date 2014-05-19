@@ -59,7 +59,7 @@ int rxp_clock_set_samplerate(rxp_clock* clock, uint64_t samplerate) {
      time is calculated only based on the played samples times sample_time. */
   clock->samplerate = samplerate;
   clock->type = RXP_CLOCK_AUDIO;
-  clock->sample_time = ((double)1.0 / (double)(samplerate)) * 1000llu * 1000llu * 1000llu;
+  clock->sample_time = ((double)1.0 / (double)(samplerate)) * (uint64_t)(1000 * 1000 * 1000);
   return 0;
 }
 

@@ -23,7 +23,6 @@ include_directories(
 )
 
 set(rxp_player_sources
-# ${sd}/test_glfw.cpp
   ${sd}/rxp_ringbuffer.c
   ${sd}/rxp_packets.c
   ${sd}/rxp_tasks.c
@@ -32,7 +31,6 @@ set(rxp_player_sources
   ${sd}/rxp_decoder.c
   ${sd}/rxp_player.c
 )
-
 
 add_library(${rxp_player} ${rxp_player_sources})
 
@@ -87,11 +85,26 @@ elseif(UNIX)
     Xi
     asound
     )
+elseif(WIN32)
+  set(app_libs
+    ${extern_lib_dir}glfw3.lib
+    ${extern_lib_dir}libpng16_static.lib
+    ${extern_lib_dir}libtheora_static.lib
+    ${extern_lib_dir}libvorbis_static.lib
+    ${extern_lib_dir}libogg_static.lib
+    ${extern_lib_dir}zlibstatic.lib
+    ${extern_lib_dir}cubeb_static.lib
+    ${extern_lib_dir}libuv.lib
+    Opengl32.lib
+    ws2_32.lib
+    psapi.lib
+    iphlpapi.lib
+    )
 endif()
 
 #add_executable(${app} ${app_sources})
 
-if(UNIX AND NOT APPLE)
+if(UNIX AND NOT APPLE OR WIN32)
   list(APPEND example_sources ${extern_source_dir}/GLXW/glxw.c)
 #  message(STATUS "Adding glxw.c for GL-function loading.")
 endif()
@@ -101,6 +114,7 @@ if(BUILD_EXAMPLES)
   add_executable(${rxp_glfw_player} ${bd}/src/examples/rxp_player_glfw.cpp ${example_sources})
   target_link_libraries(${rxp_glfw_player} ${rxp_player} ${app_libs})
   install(TARGETS ${rxp_glfw_player} DESTINATION bin)
+  install(FILES ${extern_lib_dir}/../bin/libuv.dll DESTINATION bin)
   
   if(NOT EXISTS ${install_dir}/bin/big_buck_bunny_720p_stereo.ogg)
     message(STATUS "Downloading example video (only once).")
@@ -109,11 +123,6 @@ if(BUILD_EXAMPLES)
   endif()
 
 endif()
-
-
-#target_link_libraries(${app} ${app_libs})
-
-#install(TARGETS ${app} DESTINATION bin)
 
 install(DIRECTORY ${bd}/include/ DESTINATION include)
 install(TARGETS ${rxp_player} ARCHIVE DESTINATION lib)

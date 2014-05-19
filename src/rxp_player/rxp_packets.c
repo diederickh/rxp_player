@@ -76,10 +76,12 @@ rxp_packet_queue* rxp_packet_queue_alloc() {
 
 int rxp_packet_queue_dealloc(rxp_packet_queue* q) {
 
+  rxp_packet* tail = NULL;
+  rxp_packet* next = NULL;
+
   if (!q) { return -1; } 
 
-  rxp_packet* tail = q->packets;
-  rxp_packet* next = NULL;
+  tail = q->packets;
 
   rxp_packet_queue_lock(q);
   {
@@ -169,9 +171,11 @@ int rxp_packet_queue_remove(rxp_packet_queue* q, rxp_packet* pkt) {
 
 rxp_packet* rxp_packet_queue_find_free_packet(rxp_packet_queue* q) {
   
+  rxp_packet* pkt = NULL;
+
   if (!q) { return NULL; }
 
-  rxp_packet* pkt = q->packets;
+  pkt = q->packets;
 
   while (pkt) {
     if (pkt->is_free == 1) {

@@ -35,10 +35,11 @@ int rxp_task_dealloc (rxp_task* task) {
 }
 
 int rxp_task_dealloc_all (rxp_task* task) {
+
+  rxp_task* next = NULL;
   
   if (!task) { return -1; } 
 
-  rxp_task* next = NULL;
   while (task) {
     next = task->next;
     rxp_task_dealloc(task);
@@ -151,11 +152,11 @@ void rxp_task_queue_cond_wait(rxp_task_queue* queue) {
 }
 
 int rxp_task_queue_count_tasks(rxp_task_queue* queue, int type) {
-  
-  if (!queue) { return -1; } 
 
   int count = 0;
   
+  if (!queue) { return -1; } 
+ 
   rxp_task_queue_lock(queue);
   {
     rxp_task* task = queue->tasks;
