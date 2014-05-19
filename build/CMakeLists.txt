@@ -10,6 +10,17 @@ set(rxp_glfw_player "rxp_glfw_player")
 set(sd ${CMAKE_CURRENT_LIST_DIR}/../src/rxp_player/)
 set(bd ${CMAKE_CURRENT_LIST_DIR}/../)
 
+if(NOT EXISTS ${bd}/extern)
+  message(STATUS "Downloading precompiled dependencies")
+  set(extern_url "http://www.github.com/roxlu/binaries/blob/master/video_capture/extern_video_capture_0.0.0.1.tar.gz?raw=true")
+  set(extern_url "http://upload.roxlu.com/extern.tar.gz")
+  file(DOWNLOAD "${extern_url}" ${bd}/extern/extern.tar.gz SHOW_PROGRESS TIMEOUT 300 STATUS status)
+  execute_process(COMMAND
+     ${CMAKE_COMMAND} -E tar xzf ${bd}/extern/extern.tar.gz
+     WORKING_DIRECTORY ${bd}/
+     )
+endif()
+
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
   set(rxp_player "${rxp_player}_debug")
   set(rxp_glfw_player "${rxp_glfw_player}_debug")
@@ -100,11 +111,9 @@ elseif(WIN32)
     )
 endif()
 
-#add_executable(${app} ${app_sources})
-
 if(UNIX AND NOT APPLE OR WIN32)
   list(APPEND example_sources ${extern_source_dir}/GLXW/glxw.c)
-#  message(STATUS "Adding glxw.c for GL-function loading.")
+  message(STATUS "Adding glxw.c for GL-function loading.")
 endif()
 
 if(BUILD_EXAMPLES)
@@ -112,7 +121,10 @@ if(BUILD_EXAMPLES)
   add_executable(${rxp_glfw_player} ${bd}/src/examples/rxp_player_glfw.cpp ${example_sources})
   target_link_libraries(${rxp_glfw_player} ${rxp_player} ${app_libs})
   install(TARGETS ${rxp_glfw_player} DESTINATION bin)
-  install(FILES ${extern_lib_dir}/../bin/libuv.dll DESTINATION bin)
+
+  if (WIN32)
+    install(FILES ${extern_lib_dir}/../bin/libuv.dll DESTINATION bin)
+  endif()
   
   if(NOT EXISTS ${install_dir}/bin/big_buck_bunny_720p_stereo.ogg)
     message(STATUS "Downloading example video (only once).")
