@@ -340,6 +340,7 @@ static int setup_player() {
   }
 
   std::string video = rx_get_exe_path() +"/big_buck_bunny_720p_stereo.ogg";
+  //std::string video = rx_get_exe_path() +"/big_buck_bunny_720p_no_audio.ogg";
   if (rxp_player_open(&player, (char*)video.c_str()) < 0) {
     printf("+ Error: cannot open the ogg file.\n");
     return -2;

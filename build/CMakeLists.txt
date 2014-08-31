@@ -5,10 +5,13 @@ option(BUILD_EXAMPLES "Build examples" ON)
 include(${CMAKE_CURRENT_LIST_DIR}/Triplet.cmake)
 
 set(rxp_player "rxp_player")
+set(rxp_player_driver_cpp "rxp_player_driver_cpp")
 set(rxp_glfw_player "rxp_glfw_player")
+set(rxp_cpp_glfw_player "rxp_cpp_glfw_player")
 
 set(sd ${CMAKE_CURRENT_LIST_DIR}/../src/rxp_player/)
 set(bd ${CMAKE_CURRENT_LIST_DIR}/../)
+set(dd ${CMAKE_CURRENT_LIST_DIR}/../drivers/)     
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
   set(rxp_player "${rxp_player}_debug")
@@ -20,6 +23,7 @@ include_directories(
   ${CMAKE_CURRENT_LIST_DIR}/../include
   ${extern_include_dir}
   ${bd}/extern/tinylib/src
+  ${dd}/cpp/include
 )
 
 set(rxp_player_sources
@@ -32,7 +36,13 @@ set(rxp_player_sources
   ${sd}/rxp_player.c
 )
 
+set(rxp_player_driver_cpp_sources
+  ${dd}/cpp/src/Player.cpp
+)
+
 add_library(${rxp_player} ${rxp_player_sources})
+add_library(${rxp_player_driver_cpp} ${rxp_player_driver_cpp_sources})
+add_dependencies(${rxp_player_driver_cpp} ${rxp_player})
 
 if(APPLE)
 
@@ -85,7 +95,6 @@ elseif(UNIX)
     )
 endif()
 
-#add_executable(${app} ${app_sources})
 
 if(UNIX AND NOT APPLE)
   list(APPEND example_sources ${extern_source_dir}/GLXW/glxw.c)
@@ -97,6 +106,10 @@ if(BUILD_EXAMPLES)
   add_executable(${rxp_glfw_player} ${bd}/src/examples/rxp_player_glfw.cpp ${example_sources})
   target_link_libraries(${rxp_glfw_player} ${rxp_player} ${app_libs})
   install(TARGETS ${rxp_glfw_player} DESTINATION bin)
+
+  add_executable(${rxp_cpp_glfw_player} ${bd}/src/examples/rxp_player_cpp_driver_glfw.cpp ${example_sources})
+  target_link_libraries(${rxp_cpp_glfw_player} ${rxp_player} ${app_libs} ${rxp_player_driver_cpp})
+  install(TARGETS ${rxp_cpp_glfw_player} DESTINATION bin)
   
   if(NOT EXISTS ${install_dir}/bin/big_buck_bunny_720p_stereo.ogg)
     message(STATUS "Downloading example video (only once).")
@@ -107,9 +120,7 @@ if(BUILD_EXAMPLES)
 endif()
 
 
-#target_link_libraries(${app} ${app_libs})
-
-#install(TARGETS ${app} DESTINATION bin)
-
 install(DIRECTORY ${bd}/include/ DESTINATION include)
+install(DIRECTORY ${dd}/cpp/include/ DESTINATION include)
 install(TARGETS ${rxp_player} ARCHIVE DESTINATION lib)
+install(TARGETS ${rxp_player_driver_cpp} ARCHIVE DESTINATION lib)

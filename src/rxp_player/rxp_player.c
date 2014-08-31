@@ -614,6 +614,11 @@ static void rxp_player_on_decoder_event(rxp_decoder* decoder, int event) {
       rxp_ringbuffer_init(&player->audio_buffer, 1024 * 1024 * 5); 
     }
     rxp_player_unlock(player);
+
+#if !defined(NDEBUG)
+    printf("Info: The video file has audio, so make sure to call rx_player_filll_audio_buffer which is also used for timings; w/o your video will not play!\n");
+#endif
+    
   }
 
   /* dispatch the event to a external, user defined listener */

@@ -21,3 +21,10 @@
 *.i*86
 *.x86_64
 *.hex
+
+# Custom
+build.release
+docs/build
+.DS_Store
+extern
+install

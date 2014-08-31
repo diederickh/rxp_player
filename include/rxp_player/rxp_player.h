@@ -11,6 +11,7 @@
    and resetting the player state.
 
    The flow goes something like: 
+
            The user calls rxp_player_stop(), which adds a stop task to the scheduler,
            which in turn will handle this as quickly as possible. When the scheduler
            finds this task, it cleans internally used memory, calls the close_file 

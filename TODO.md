@@ -4,6 +4,14 @@
  
  - All functions need to return  < 0 on error, 0 on success 
 
+ TODO rxp::Player + rxp::PlayerGL
+ --------------------------------
+ - At this moment the rxp::Player and rxp::PlayerGL have no support for 
+   audio playback so playing a video that contains also audio will 
+   not work because the internal audio timer is not updated. The player 
+   works fine with video w/o audio. For now you can use avconv to remove
+   the audio. 
+
  TODO rxp_scheduler
  ------------------
 
