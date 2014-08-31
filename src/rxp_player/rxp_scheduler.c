@@ -109,10 +109,11 @@ int rxp_scheduler_start(rxp_scheduler* s) {
 
 int rxp_scheduler_open_file(rxp_scheduler* s, char* file) {
  
+  rxp_task* task;
   if (!s) { return -1; } 
   if (!file) { return -2; } 
 
-  rxp_task* task = rxp_task_alloc();
+  task = rxp_task_alloc();
   if (!task) {
     return -3;
   }
@@ -167,13 +168,13 @@ int rxp_scheduler_close_file(rxp_scheduler* s) {
 
 void rxp_scheduler_update(rxp_scheduler* s) {
 
+  uint64_t decoded_pts;
+  uint64_t goal_pts;
+  int state;
+
 #if !defined(NDEBUG)
   if (!s) { printf("Error: invalid scheduler given.\n"); return;} 
 #endif
-
-  uint64_t decoded_pts;
-  uint64_t goal_pts;
-  int state = 0;
 
   /* check if we need to decode a  bit more */
   rxp_scheduler_lock(s);
@@ -250,7 +251,9 @@ static int rxp_scheduler_unlock(rxp_scheduler* s) {
 
 static void rxp_scheduler_add_decode_task(rxp_scheduler* s) {
 
-  rxp_task* task = rxp_task_alloc();
+  rxp_task* task;
+
+  task = rxp_task_alloc();
   if(!task) {
     printf("Error: cannot allocate a new rxp_task for the scheduler.\n");
     exit(1);
@@ -267,9 +270,11 @@ static void rxp_scheduler_add_decode_task(rxp_scheduler* s) {
 
 static int rxp_scheduler_add_task(rxp_scheduler* s, int tasktype) {
 
+  rxp_task* task;
+
   if (!s) { return -1; } 
 
-  rxp_task* task = rxp_task_alloc();
+  task = rxp_task_alloc();
   if(!task) {
     printf("Error: cannot allocate a new rxp_task for the scheduler, in rxp_scheduler_stop().\n");
     exit(1);
@@ -287,11 +292,17 @@ static int rxp_scheduler_add_task(rxp_scheduler* s, int tasktype) {
 
 static void rxp_scheduler_thread(void* scheduler) {
   
-  rxp_scheduler* s = (rxp_scheduler*) scheduler;
-  rxp_task_queue* queue = &s->tasks;
-  rxp_task* work = NULL; /* list with current work. */
-  rxp_task* task = NULL; /* a task from the current work list */
-  int should_stop = 0;
+  rxp_scheduler* s;
+  rxp_task_queue* queue;
+  rxp_task* work; /* list with current work. */
+  rxp_task* task; /* a task from the current work list */
+  int should_stop;
+
+  s = (rxp_scheduler*) scheduler;
+  queue = &s->tasks;
+  work = NULL;
+  task = NULL;
+  should_stop = 0;
   
   while (1) {
 

@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
+project(rxp_player)
+
 option(BUILD_EXAMPLES "Build examples" ON)
 
 include(${CMAKE_CURRENT_LIST_DIR}/Triplet.cmake)
@@ -12,6 +14,20 @@ set(rxp_cpp_glfw_player "rxp_cpp_glfw_player")
 set(sd ${CMAKE_CURRENT_LIST_DIR}/../src/rxp_player/)
 set(bd ${CMAKE_CURRENT_LIST_DIR}/../)
 set(dd ${CMAKE_CURRENT_LIST_DIR}/../drivers/)     
+
+if(NOT EXISTS ${bd}/extern)
+  message(STATUS "Downloading precompiled dependencies")
+  set(extern_url "http://www.github.com/roxlu/binaries/blob/master/video_capture/extern_video_capture_0.0.0.1.tar.gz?raw=true")
+  set(extern_url "http://upload.roxlu.com/extern.tar.gz")
+  file(DOWNLOAD "${extern_url}" ${bd}/extern/extern.tar.gz SHOW_PROGRESS TIMEOUT 300 STATUS status)
+endif()
+
+if (NOT EXISTS ${extern_lib_dir} AND EXISTS ${bd}/extern/extern.tar.gz)
+  execute_process(COMMAND
+     ${CMAKE_COMMAND} -E tar xzf ${bd}/extern/extern.tar.gz
+     WORKING_DIRECTORY ${bd}/
+     )
+endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
   set(rxp_player "${rxp_player}_debug")
@@ -93,12 +109,27 @@ elseif(UNIX)
     Xi
     asound
     )
+elseif(WIN32)
+  set(app_libs
+    ${extern_lib_dir}glfw3.lib
+    ${extern_lib_dir}libpng16_static.lib
+    ${extern_lib_dir}libtheora_static.lib
+    ${extern_lib_dir}libvorbis_static.lib
+    ${extern_lib_dir}libogg_static.lib
+    ${extern_lib_dir}zlibstatic.lib
+    ${extern_lib_dir}cubeb_static.lib
+    ${extern_lib_dir}libuv.lib
+    Opengl32.lib
+    ws2_32.lib
+    psapi.lib
+    iphlpapi.lib
+    )
 endif()
 
 
-if(UNIX AND NOT APPLE)
+if(UNIX AND NOT APPLE OR WIN32)
   list(APPEND example_sources ${extern_source_dir}/GLXW/glxw.c)
-#  message(STATUS "Adding glxw.c for GL-function loading.")
+  message(STATUS "Adding glxw.c for GL-function loading.")
 endif()
 
 if(BUILD_EXAMPLES)
@@ -110,6 +141,11 @@ if(BUILD_EXAMPLES)
   add_executable(${rxp_cpp_glfw_player} ${bd}/src/examples/rxp_player_cpp_driver_glfw.cpp ${example_sources})
   target_link_libraries(${rxp_cpp_glfw_player} ${rxp_player} ${app_libs} ${rxp_player_driver_cpp})
   install(TARGETS ${rxp_cpp_glfw_player} DESTINATION bin)
+
+  if (WIN32)
+    install(FILES ${extern_lib_dir}/../bin/libuv.dll DESTINATION bin)
+  endif()
+
   
   if(NOT EXISTS ${install_dir}/bin/big_buck_bunny_720p_stereo.ogg)
     message(STATUS "Downloading example video (only once).")
@@ -118,7 +154,6 @@ if(BUILD_EXAMPLES)
   endif()
 
 endif()
-
 
 install(DIRECTORY ${bd}/include/ DESTINATION include)
 install(DIRECTORY ${dd}/cpp/include/ DESTINATION include)

@@ -68,11 +68,13 @@ int rxp_decoder_init(rxp_decoder* d) {
 
 int rxp_decoder_clear(rxp_decoder* d) {
 
+  /* clear ogg */
+  rxp_stream* stream = NULL;
+  rxp_stream* next_stream = NULL;
+
   if (!d) { return -1; } 
 
-  /* clear ogg */
-  rxp_stream* stream = d->streams;
-  rxp_stream* next_stream = NULL;
+  stream = d->streams;
 
   while (stream) {
     next_stream = stream->next;
@@ -127,6 +129,8 @@ rxp_stream* rxp_stream_alloc() {
 
 int rxp_decoder_open_file(rxp_decoder* decoder, char* filepath) {
   
+  long size = 0;
+
   if (!decoder) { return -1; } 
   if (!filepath) { return -2; } 
 
@@ -138,7 +142,6 @@ int rxp_decoder_open_file(rxp_decoder* decoder, char* filepath) {
   }
 
   /* find size */
-  long size = 0;
   fseek(decoder->fp, 0, SEEK_END);
   size = ftell(decoder->fp);
   fseek(decoder->fp, 0, SEEK_SET);
@@ -173,14 +176,14 @@ int rxp_decoder_close_file(rxp_decoder* decoder) {
 
 int rxp_decoder_decode(rxp_decoder* decoder) {
 
-  if (!decoder) { return -1; }
-  if (!decoder->fp) { return -2; } 
-
   /* retrieve an ogg page */
   int r = 0;
   ogg_page page;
   ogg_packet packet;
   rxp_stream* stream = NULL;
+
+  if (!decoder) { return -1; }
+  if (!decoder->fp) { return -2; } 
 
   /* reaad an page */
   if (rxp_decoder_read_oggpage(decoder, &page) < 0) {
@@ -322,6 +325,7 @@ static int rxp_decoder_decode_theora(rxp_decoder* decoder, rxp_stream* stream, o
   th_ycbcr_buffer buffer;
   int r = -1;
   rxp_theora* theora = &decoder->theora;
+  double time_s;
 
   if(theora->ctx == NULL) {
 
@@ -378,8 +382,9 @@ static int rxp_decoder_decode_theora(rxp_decoder* decoder, rxp_stream* stream, o
     exit(1);
   }
 
-  double time_s = (double)(th_granule_time(theora->ctx, granulepos)) ;
-  stream->decoded_pts = time_s * 1000ull * 1000ull * 1000ull;
+  time_s = (double)(th_granule_time(theora->ctx, granulepos)) ;
+  //stream->decoded_pts = time_s * 1000ull * 1000ull * 1000ull;
+  stream->decoded_pts = time_s * 1e9;
 
   if (decoder->on_theora) {
     decoder->on_theora(decoder, stream->decoded_pts, buffer);
