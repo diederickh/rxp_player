@@ -108,8 +108,8 @@ namespace rxp {
     int init(std::string filepath);
     int shutdown();
     void update();
-    void draw();                                                            /* draw full screen */
-    void draw(int x, int y, int w, int h);                                  /* draw the video at (x,y) from top left of the window, */
+    void draw();                                                            /* draw full screen (don't change the viewport)  */
+    void draw(int x, int y, int w, int h);                                  /* draw the video at (x,y) from top left of the window (will call glViewport) */
     void resize(int w, int h);                                              /* call this when the window resizes. */
     int play();
     int pause();
@@ -165,8 +165,10 @@ namespace rxp {
     return ctx.isPaused();
   }
 
-  inline void PlayerGL::draw() {
-    draw(0, 0, vp[2], vp[3]);
+  inline void PlayerGL::draw(int x, int y, int w, int h) {
+    glViewport(x, (vp[3] - y) - h, w, h); 
+        draw();
+    glViewport(0, 0, vp[2], vp[3]);
   }
 
   inline void PlayerGL::resize(int w, int h) {
@@ -309,7 +311,7 @@ namespace rxp {
     return r;
   }
 
-  void PlayerGL::draw(int x, int y, int w, int h) {
+  void PlayerGL::draw() {
 
     if (0 == tex_y) {
       return;
@@ -338,9 +340,7 @@ namespace rxp {
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, tex_v);
 
-    glViewport(x, (vp[3] - y) - h, w, h); 
-      glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glViewport(0, 0, vp[2], vp[3]);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
   }
 
   int PlayerGL::shutdown() {
