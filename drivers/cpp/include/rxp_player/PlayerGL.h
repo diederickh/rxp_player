@@ -420,6 +420,8 @@ namespace rxp {
     glBindTexture(GL_TEXTURE_2D, gl->tex_v);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, pkt->img[2].stride);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, pkt->img[2].width, pkt->img[2].height, GL_RED, GL_UNSIGNED_BYTE, pkt->img[2].data);
+
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
   }
 
   static GLuint create_texture(int width, int height) {
