@@ -45,7 +45,7 @@ namespace rxp {
     if (0 != rxp_player_open(&ctx, (char*)filepath.c_str())) {
       printf("Error: cannot open the file: %s\n", filepath.c_str());
       if (0 != rxp_player_clear(&ctx)) {
-        printf("Error: after not being able to open the file we tried to clear up memory which failed.");
+        printf("Error: after not being able to open the file we tried to clear up memory which failed.\n");
         result = -4;
         goto error;
       }
@@ -84,7 +84,7 @@ namespace rxp {
   int Player::shutdown() {
     
     if (false == is_init) {
-      printf("Error: it looks like you didn't initialize the player.");
+      printf("Info: it looks like you didn't initialize the player or already shutdown the player..");
       return -1;
     }
 

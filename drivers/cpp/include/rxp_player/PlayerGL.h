@@ -546,6 +546,4 @@ static int print_shader_compile_info(GLuint shader) {
 
 #endif // RXP_PLAYER_GL_IMPLEMENTATION
 
-
-
-
+#undef RXP_PLAYER_GL_IMPLEMENTATION
