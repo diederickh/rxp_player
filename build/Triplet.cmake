@@ -47,7 +47,6 @@ set(extern_lib_dir ${CMAKE_CURRENT_LIST_DIR}/../extern/${tri_triplet}/lib/)
 set(extern_include_dir ${CMAKE_CURRENT_LIST_DIR}/../extern/${tri_triplet}/include)
 
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  message(FATAL_ERROR "Set install dir ${install_dir}")
   set(CMAKE_INSTALL_PREFIX ${install_dir})
 endif()
 

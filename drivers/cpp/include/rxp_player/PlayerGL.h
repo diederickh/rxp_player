@@ -97,7 +97,7 @@ namespace rxp {
 
   class PlayerGL;
   typedef void(*rxp_playergl_on_event_callback)(PlayerGL* player, int event);
-
+  typedef void(*rxp_playergl_on_video_frame_callback)(PlayerGL* player, rxp_packet* pkt);
   /* ------------------------------------------------------------------------*/
 
   class PlayerGL {
@@ -122,6 +122,7 @@ namespace rxp {
 
     /* callback */
     rxp_playergl_on_event_callback on_event;                                /* gets called when we receive a player event. */  
+    rxp_playergl_on_video_frame_callback on_video_frame;                    /* gets called when we've update the video frame */
     void* user;                                                             /* can be set to any user data. */
 
     /* GL */
@@ -212,6 +213,7 @@ namespace rxp {
     ,video_width(0)
     ,video_height(0)
     ,on_event(NULL)
+    ,on_video_frame(NULL)
     ,user(NULL)
   {
   }
@@ -235,6 +237,7 @@ namespace rxp {
     ctx.user = NULL;
 
     on_event = NULL;
+    on_video_frame = NULL;
     user = NULL;
   }
 
@@ -365,17 +368,17 @@ namespace rxp {
     }
 
     if (RXP_PLAYER_EVENT_RESET == event) {
-
       gl->shutdown();
-
-      if (NULL != gl->on_event) {
-        gl->on_event(gl, event);
-      }
     }
     else if (RXP_DEC_EVENT_AUDIO_INFO == event) {
       printf("Error: we got a file with audio but we currently do not yet "
              "support this in PlayerGL (the timing info is not update because "
              "the rxp_player_fill_audio_buffer() is not called).\n");
+    }
+
+    /* and dispatch the event to the user. */
+    if (NULL != gl->on_event) {
+      gl->on_event(gl, event);
     }
   }
 
@@ -422,6 +425,11 @@ namespace rxp {
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, pkt->img[2].width, pkt->img[2].height, GL_RED, GL_UNSIGNED_BYTE, pkt->img[2].data);
 
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+
+    /* and notify listener */
+    if (gl->on_video_frame) {
+      gl->on_video_frame(gl, pkt);
+    }
   }
 
   static GLuint create_texture(int width, int height) {
