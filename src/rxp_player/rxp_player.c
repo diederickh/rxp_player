@@ -65,6 +65,7 @@ int rxp_player_init(rxp_player* player) {
   player->must_stop = 0;
   player->on_video_frame = NULL;
   player->on_event = NULL;
+  player->state = RXP_PSTATE_NONE;
 
   return 0;
 }
