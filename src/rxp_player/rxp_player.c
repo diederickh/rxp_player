@@ -66,16 +66,23 @@ int rxp_player_init(rxp_player* player) {
   player->on_video_frame = NULL;
   player->on_event = NULL;
   player->state = RXP_PSTATE_NONE;
+  player->is_init = 1;
 
   return 0;
 }
 
 int rxp_player_clear(rxp_player* player) {
 
+  int r = 0;
+
   /* @todo - how to do we handle situations where the user calls 
              rxp_player_clear but e.g. the scheduler is still playing? do 
              we stop it and join the thread? */
   if (!player) { return -1; } 
+
+  if (player->is_init != 1) {
+    printf("NOT INITIALIZED\n");
+  }
 
   if (player->state != RXP_PSTATE_NONE) {
     printf("Warning: you're trying to clear a player which states has still some meaning: %d\n", player->state);
@@ -118,7 +125,10 @@ int rxp_player_clear(rxp_player* player) {
     }
   }
 
-  uv_mutex_destroy(&player->mutex);
+  r = uv_mutex_destroy(&player->mutex);
+  if (0 != r) {
+    printf("Error while trying to destroy the mutex: %s", uv_strerror(r));
+  }
 
   player->last_used_pts = 0;
   player->total_audio_frames = 0;
@@ -129,6 +139,7 @@ int rxp_player_clear(rxp_player* player) {
   player->user = NULL;
   player->on_video_frame = NULL;
   player->on_event = NULL;
+  player->is_init = 0;
 
   return 0;
 }
@@ -320,14 +331,24 @@ void rxp_player_update(rxp_player* player) {
 }
 
 int rxp_player_lock(rxp_player* player) {
+  int r = 0;
   if (!player) { return -1; } 
-  uv_mutex_lock(&player->mutex);
+
+  r = uv_mutex_lock(&player->mutex);
+  if (r != 0) {
+    printf("Error: cannot lock the mutex: %s", uv_strerror(r));
+  }
   return 0;
 }
 
 int rxp_player_unlock(rxp_player* player) {
+  int r = 0;
   if (!player) { return -1; } 
-  uv_mutex_unlock(&player->mutex);
+
+  r = uv_mutex_unlock(&player->mutex);
+  if (r != 0) {
+    printf("Error: cannot unlock the mutex: %s", uv_strerror(r));
+  }
   return 0;
 }
 
