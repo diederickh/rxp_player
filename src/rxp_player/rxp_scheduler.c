@@ -51,14 +51,13 @@ int rxp_scheduler_clear(rxp_scheduler* s) {
   s->played_pts = 0;
   s->state = RXP_SCHED_STATE_NONE;
   s->thread = 0;
-
+  
   uv_mutex_destroy(&s->mutex);
 
   if (rxp_task_queue_shutdown(&s->tasks) < 0) {
     printf("Error: cannot cleanup the task queue of the scheduler.\n");
     return -4;
   }
-
 
   return 0;
 }
@@ -154,9 +153,25 @@ int rxp_scheduler_play(rxp_scheduler* s) {
 }
 
 int rxp_scheduler_stop(rxp_scheduler* s) {
+  int state = 0;
   if (!s) { return -1; } 
+  
+  rxp_scheduler_lock(s);
+    state = s->state;
+  rxp_scheduler_unlock(s);
+
+  if ( (state & (RXP_SCHED_STATE_STARTED | RXP_SCHED_STATE_DECODING)) == 0) {
+    printf("Warning: trying to stop the scheduler, but it's not running.\n");
+    return -1;
+  }
+
   rxp_scheduler_add_task(s, RXP_TASK_STOP);
   uv_thread_join(&s->thread);
+
+  rxp_scheduler_lock(s);
+    s->state &= ~(RXP_SCHED_STATE_DECODING | RXP_SCHED_STATE_STARTED);
+  rxp_scheduler_unlock(s);
+
   return 0;
 }
 
@@ -167,7 +182,6 @@ int rxp_scheduler_close_file(rxp_scheduler* s) {
 }
 
 void rxp_scheduler_update(rxp_scheduler* s) {
-
   uint64_t decoded_pts;
   uint64_t goal_pts;
   int state;
@@ -340,16 +354,9 @@ static void rxp_scheduler_thread(void* scheduler) {
           rxp_scheduler_handle_task(s, task);
         }
         if (task->type == RXP_TASK_STOP) {
-
-          rxp_scheduler_lock(s);
-          s->state &= ~(RXP_SCHED_STATE_DECODING | RXP_SCHED_STATE_STARTED);
-          rxp_scheduler_unlock(s);
-
           /* when we recieved a stop task, we clear our task queue and stop the thread */
           rxp_scheduler_handle_task(s, task);
           rxp_task_dealloc_all(work); 
-        
-          should_stop = 1;
         }
         task = task->next;
       }
