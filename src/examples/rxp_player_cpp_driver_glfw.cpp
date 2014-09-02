@@ -125,6 +125,7 @@ int main() {
   }
  
   player.stop();
+  player.shutdown();
 
   glfwTerminate();
  

@@ -125,10 +125,7 @@ int rxp_player_clear(rxp_player* player) {
     }
   }
 
-  r = uv_mutex_destroy(&player->mutex);
-  if (0 != r) {
-    printf("Error while trying to destroy the mutex: %s", uv_strerror(r));
-  }
+  uv_mutex_destroy(&player->mutex);
 
   player->last_used_pts = 0;
   player->total_audio_frames = 0;
@@ -331,24 +328,14 @@ void rxp_player_update(rxp_player* player) {
 }
 
 int rxp_player_lock(rxp_player* player) {
-  int r = 0;
   if (!player) { return -1; } 
-
-  r = uv_mutex_lock(&player->mutex);
-  if (r != 0) {
-    printf("Error: cannot lock the mutex: %s", uv_strerror(r));
-  }
+  uv_mutex_lock(&player->mutex);
   return 0;
 }
 
 int rxp_player_unlock(rxp_player* player) {
-  int r = 0;
   if (!player) { return -1; } 
-
-  r = uv_mutex_unlock(&player->mutex);
-  if (r != 0) {
-    printf("Error: cannot unlock the mutex: %s", uv_strerror(r));
-  }
+  uv_mutex_unlock(&player->mutex);
   return 0;
 }
 
