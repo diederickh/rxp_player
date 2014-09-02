@@ -142,6 +142,7 @@ namespace rxp {
   /* ------------------------------------------------------------------ */
 
   inline int PlayerGL::play() {
+    printf("++++ PLAY\n");
     return ctx.play();
   }
 
@@ -150,6 +151,7 @@ namespace rxp {
   }
 
   inline int PlayerGL::stop() {
+    printf("++++ STOP\n");
     return ctx.stop();
   }
 
@@ -245,6 +247,8 @@ namespace rxp {
 
   int PlayerGL::init(std::string filepath) {
     int r = 0;
+
+    printf("++++ INIT\n");
 
     /* initialize the player. */
     r = ctx.init(filepath);
@@ -348,6 +352,7 @@ namespace rxp {
 
     /* shutdown the player context. */
     if (0 == ctx.isInit()) {
+      printf("++++ SHUTDOWN\n");
       r = ctx.shutdown();
       if (0 != r) {
         printf("Error: the player returned an error while trying to shutdown.\n");
@@ -368,7 +373,7 @@ namespace rxp {
     }
 
     if (RXP_PLAYER_EVENT_RESET == event) {
-      gl->shutdown();
+      // gl->shutdown();
     }
     else if (RXP_DEC_EVENT_AUDIO_INFO == event) {
       printf("Error: we got a file with audio but we currently do not yet "

@@ -70,6 +70,7 @@ struct rxp_player {
   int nchannels;                                                                           /* the number of audio channels of the audio stream when found */
   int state;                                                                               /* the player state */
   int must_stop;                                                                           /* this is set to 1 in the rxp_player_fill_audio_buffer() when there is no audio left to play back and we should stop playing. We cannot simply dealloc/clear/reset everything in the audio callback becuase that function is not allowed to take too much time */
+  int is_init;
 
   /* callback */
   void* user;
