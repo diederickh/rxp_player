@@ -177,7 +177,6 @@ static void on_event(rxp::PlayerGL* p, int event) {
   }
 }
 
-
 static int setup_player(rxp::PlayerGL* gl) {
 
   if (NULL == gl) {
