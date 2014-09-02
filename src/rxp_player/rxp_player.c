@@ -17,8 +17,6 @@ static void rxp_player_reset(rxp_player* player);                               
 
 int rxp_player_init(rxp_player* player) {
 
-  printf("++++ INIT\n");  
-
   if (!player) { return -1; } 
 
   if (player->is_init == 1) {
@@ -96,11 +94,6 @@ int rxp_player_clear(rxp_player* player) {
   }
   player->is_init = -1;
 
-  if ((player->state & RXP_PSTATE_SHUTTING_DOWN) == RXP_PSTATE_SHUTTING_DOWN) {
-    printf("Shutting down..\n");
-    return -102;
-  }
-
   if (0 == rxp_player_has_state(player, RXP_PSTATE_SHUTTING_DOWN)) {
     printf("We're in the process of shutting down. Did you call rxp_player_clear() already?\n");
     return -101;
@@ -116,8 +109,6 @@ int rxp_player_clear(rxp_player* player) {
       return -100;
     }
   }
-  
-  printf("++++ CLEAR (state: %d), %p, is_init: %d\n", rxp_player_get_state(player), player, player->is_init);
 
   if (rxp_packet_queue_dealloc(&player->packets) < 0) {
     printf("Error: cannot deallocate the allocated video packets of the player.\n");
@@ -190,8 +181,6 @@ int rxp_player_open(rxp_player* player, char* file) {
 
 int rxp_player_play(rxp_player* player) {
 
-  printf("++++ PLAY\n");
-
   int state = 0;
   int r = 0;
 
@@ -236,8 +225,6 @@ int rxp_player_play(rxp_player* player) {
 
 int rxp_player_stop(rxp_player* player) {
 
-  printf("++++ STOP\n");
-
   int r = 0;
   int least_state = (RXP_PSTATE_PLAYING | RXP_PSTATE_PAUSED);
 
@@ -254,7 +241,6 @@ int rxp_player_stop(rxp_player* player) {
     }
     else {
       player->state &= ~(RXP_PSTATE_PAUSED | RXP_PSTATE_PLAYING);
-      printf("STATE: %04X, player: %p\n", player->state, player);
     }
   }
   rxp_player_unlock(player);

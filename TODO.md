@@ -42,6 +42,10 @@
  - Maybe we need to set the audio format in the player/decoder as well
    so the user knows what kind of audio data we're dealing with.
 
+ - I added a is_dsp_init flag to the rxp_vorbis struct so I could clear
+   it only when it has been initialized. This maybe could be done w/o a
+   flag and just memsetting the block/state members to 0x00.
+
 
  TODO rxp_player
  ---------------
