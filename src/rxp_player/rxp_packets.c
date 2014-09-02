@@ -81,8 +81,13 @@ int rxp_packet_queue_dealloc(rxp_packet_queue* q) {
 
   if (!q) { return -1; } 
 
-  tail = q->packets;
+  if (q->is_init == -1) { 
+    printf("Info: you're trying to deallocate a packet queue which is already deallocated.\n");
+    return 0;
+  }
 
+  tail = q->packets;
+  
   rxp_packet_queue_lock(q);
   {
     while (tail) {
@@ -95,6 +100,8 @@ int rxp_packet_queue_dealloc(rxp_packet_queue* q) {
 
   q->packets = NULL;
   q->last_packet = NULL;
+  q->is_init = -1;
+
   uv_mutex_destroy(&q->mutex);
   
   return 0;
@@ -106,6 +113,7 @@ int rxp_packet_queue_init(rxp_packet_queue* q) {
 
   q->packets = NULL;
   q->last_packet = NULL;
+  q->is_init = 1;
 
   uv_mutex_init(&q->mutex);
 

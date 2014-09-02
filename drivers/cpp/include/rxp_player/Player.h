@@ -42,6 +42,8 @@ namespace rxp {
   public:
     rxp_player ctx;
     bool is_init;
+    bool is_playing;
+    bool is_paused;
     rxp_cpp_player_on_video_frame_callback on_video_frame;
     rxp_cpp_player_on_event_callback on_event;         /* gets called whenever an event from the player occurs; this may happen from a different thread. */
     void* user;

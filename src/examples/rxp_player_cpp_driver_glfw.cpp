@@ -142,6 +142,27 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
   }
  
   switch(key) {
+    case GLFW_KEY_1: {
+      std::string video = rx_get_exe_path() +"/big_buck_bunny_720p_no_audio.ogg";
+      player.init(video);
+      break;
+    }
+    case GLFW_KEY_2: {
+      player.play();
+      break;
+    }
+    case GLFW_KEY_3: {
+      player.stop();
+      break;
+    }
+    case GLFW_KEY_4: {
+      player.shutdown();
+      break;
+    }
+    case GLFW_KEY_5: {
+      player.pause();
+      break;
+    }
     case GLFW_KEY_ESCAPE: {
       glfwSetWindowShouldClose(win, GL_TRUE);
       break;
@@ -173,7 +194,7 @@ static void on_event(rxp::PlayerGL* p, int event) {
   }
 
   if (RXP_PLAYER_EVENT_RESET == event) {
-    restart = true;
+    //  restart = true;
   }
 }
 
@@ -186,7 +207,8 @@ static int setup_player(rxp::PlayerGL* gl) {
 
   printf("+ We're going to (re)start the player.\n");
 
-  std::string video = rx_get_exe_path() +"tiny.ogg";
+  //std::string video = rx_get_exe_path() +"tiny.ogg";
+  std::string video = rx_get_exe_path() +"/big_buck_bunny_720p_no_audio.ogg";
   if (0 != gl->init(video)) {
     printf("Error: canot open the video file.\n");
     ::exit(EXIT_FAILURE);

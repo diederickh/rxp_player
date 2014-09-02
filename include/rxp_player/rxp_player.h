@@ -70,6 +70,7 @@ struct rxp_player {
   int nchannels;                                                                           /* the number of audio channels of the audio stream when found */
   int state;                                                                               /* the player state */
   int must_stop;                                                                           /* this is set to 1 in the rxp_player_fill_audio_buffer() when there is no audio left to play back and we should stop playing. We cannot simply dealloc/clear/reset everything in the audio callback becuase that function is not allowed to take too much time */
+  int is_init;                                                                            /* 1 = yes, -1 = no */ 
 
   /* callback */
   void* user;
@@ -88,7 +89,10 @@ int rxp_player_unlock(rxp_player* player);                                      
 int rxp_player_fill_audio_buffer(rxp_player* player, void* buffer, uint32_t nsamples);     /* the user should call this from their audio callback. buffer must be an pointer to an array that can be filled with the pcm that the decoder generates, nframes is the number of frames one wants to fill, we will return 0 on success, -1 when you need to stop your audio stream */
 int rxp_player_is_playing(rxp_player* player);                                             /* returns 0 when the player is playing, else 1 or < 0 on error*/
 int rxp_player_is_paused(rxp_player* player);                                              /* returns 0 when player is paused, else 1 or < 0 on error */
-
+int rxp_player_get_state(rxp_player* player);                                              /* thread safe getting of the state */
+int rxp_player_set_state(rxp_player* player, int state);                                   /* thread safe setting/unsetting of state flags. */
+int rxp_player_unset_state(rxp_player* player, int state);                                 /* thread safe setting/unsetting of state flags. */  
+int rxp_player_has_state(rxp_player* player, int state);                                   /* thread safe testing for a state; returns 0 when state is set otherwise < 0. */ 
 void rxp_player_update(rxp_player* player);                                                /* you should call this regularly so we can call e.g. `on_video_frame()` callback when needed. */
 
 #endif

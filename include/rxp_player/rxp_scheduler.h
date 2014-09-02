@@ -71,6 +71,7 @@ struct rxp_scheduler {
   int state;                                                                          /* we need to keep state because we don't want to add extra decoding tasks when we're already decoding */
   uv_mutex_t mutex;                                                                   /* mutex to protect the data of the scheduler */
   uv_thread_t thread;                                                                 /* handle to the thread in which we decode */
+  int is_init;                                                                        /* is set to 1 when initialized, otherwise -1 */
 
   /* callbacks */
   void* user;                                                                         /* custom user data */

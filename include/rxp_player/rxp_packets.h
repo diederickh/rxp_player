@@ -44,6 +44,7 @@ struct rxp_packet_queue {
   rxp_packet* packets;
   rxp_packet* last_packet;
   uv_mutex_t mutex;
+  int is_init;                                                           /* is set to 1 when initialized, otherwise -1 */ 
 };
 
 /* Image */
@@ -55,7 +56,7 @@ int rxp_packet_dealloc(rxp_packet* pkt);                                 /* deal
 
 /* Packet queue */
 rxp_packet_queue* rxp_packet_queue_alloc();                              /* allocate a packet queue */
-int rxp_packet_queue_dealloc(rxp_packet_queue* q);                       /* deallocates all the packets in the queue, it will lock the queue*/
+int rxp_packet_queue_dealloc(rxp_packet_queue* q);                       /* deallocates all the packets in the queue, it will lock the queue. when the queue is already deallocated this will return 0 */
 int rxp_packet_queue_init(rxp_packet_queue* queue);                      /* initialize an allocated packet queue */
 int rxp_packet_queue_add(rxp_packet_queue* q, rxp_packet* pkt);          /* append a packet to the queue */
 int rxp_packet_queue_remove(rxp_packet_queue* q, rxp_packet* pkt);       /* remove a packet from the queue */

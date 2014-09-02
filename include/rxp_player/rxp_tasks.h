@@ -30,6 +30,7 @@ struct rxp_task_queue {
   uv_mutex_t mutex;
   uv_cond_t cond;
   int size;
+  int is_init;                                                           /* 1 == yes, -1 nope */
 };
 
 rxp_task* rxp_task_alloc();                                              /* allocates and initializes a new task */

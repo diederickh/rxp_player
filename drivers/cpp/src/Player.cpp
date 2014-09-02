@@ -9,6 +9,8 @@ namespace rxp {
 
   Player::Player() 
     :is_init(false)
+    ,is_playing(false)
+    ,is_paused(false)
     ,on_event(NULL)
     ,on_video_frame(NULL)
     ,user(NULL)
@@ -24,6 +26,8 @@ namespace rxp {
     on_video_frame = NULL;
     user = NULL;
     is_init = false;
+    is_playing = false;
+    is_paused = false;
   }
 
   int Player::init(std::string filepath) {
@@ -88,45 +92,65 @@ namespace rxp {
       printf("Info: it looks like you didn't initialize the player or already shutdown the player.\n");
       return -1;
     }
+    printf("IS_INIT: %d\n", is_init);
+    is_init = false;
+
 
     if (0 != rxp_player_clear(&ctx)) {
       printf("Error: cannot clear/shutdown the player.\n");
     }
-
-    is_init = false;
 
     return 0;
   }
 
   int Player::play() {
 
+    if (true == is_playing) {
+      printf("Info: already playing, ignoring request.\n");
+      return 0;
+    }
+
     if (0 != rxp_player_play(&ctx)) {
       printf("Error: cannot start playing.\n");
       return -1;
     }
+
+    is_playing = true;
+    is_paused = false;
 
     return 0;
   }
 
   int Player::pause() {
 
+    if (true == is_paused) {
+      printf("Info: already paused; ignoring request.\n");
+      return 0;
+    }
+
     if (0 != rxp_player_pause(&ctx)) {
       printf("Error: cannot pause the video playback.\n");
       return -1;
     }
+
+    is_paused = true;
+    is_playing = false;
 
     return 0;
   }
 
   int Player::stop() {
 
-    if (0 != isPlaying()) {
+    if (-1 == isPlaying() && -1 == isPaused()) {
       printf("Info: cannot stop the player, we're not playing. \n");
       return -1;
     }
 
+    is_paused = false;
+    is_playing = false;
+
     if (0 != rxp_player_stop(&ctx)) {
-      printf("Error: cannot stop the video playback.\n");
+
       return -2;
     }
 
@@ -134,11 +158,11 @@ namespace rxp {
   }
 
   int Player::isPlaying() {
-    return rxp_player_is_playing(&ctx);
+    return is_playing ? 0 : -1;
   }
 
   int Player::isPaused() {
-    return rxp_player_is_paused(&ctx);
+    return is_paused ? 0 : -1;
   }
 
   /* ------------------------------------------------------------------ */

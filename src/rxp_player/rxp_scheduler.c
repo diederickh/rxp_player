@@ -33,7 +33,12 @@ rxp_scheduler* rxp_scheduler_alloc() {
 
 int rxp_scheduler_clear(rxp_scheduler* s) {
 
-  if (!s) { return -1; } 
+  if (!s) { return -1; }
+  
+  if (-1 == s->is_init) {
+    printf("Info: you're trying to clear a scheduler which is already deinitialized.\n");
+    return 0;
+  }
 
   if(s->state != RXP_SCHED_STATE_NONE) {
     printf("Error: Your'e trying to dealloc a scheduler which still has some state: %d\n", s->state);
@@ -51,6 +56,7 @@ int rxp_scheduler_clear(rxp_scheduler* s) {
   s->played_pts = 0;
   s->state = RXP_SCHED_STATE_NONE;
   s->thread = 0;
+  s->is_init = -1;
   
   uv_mutex_destroy(&s->mutex);
 
@@ -66,6 +72,11 @@ int rxp_scheduler_init(rxp_scheduler* s) {
 
   if (!s) { return -1; } 
 
+  if (1 == s->is_init) {
+    printf("Info: you're trying to initialize a scheduler which is already initialized.\n");
+    return 0;
+  }
+
   /* callbacks */
   s->decode = NULL;
   s->open_file = NULL;
@@ -78,6 +89,7 @@ int rxp_scheduler_init(rxp_scheduler* s) {
   s->decoded_pts = 0;
   s->played_pts = 0;
   s->state = RXP_SCHED_STATE_NONE;
+  s->is_init = 1;
   
   if (uv_mutex_init(&s->mutex) != 0) {
     printf("Error: cannot initialze the mutex for scheduler.\n");

@@ -53,6 +53,11 @@ int rxp_task_queue_init (rxp_task_queue* queue) {
  
   if (!queue) { return -1; } 
 
+  if (1 == queue->is_init) {
+    printf("Info: task queue already initialized.\n");
+    return 0;
+  }
+
   if (uv_mutex_init(&queue->mutex) != 0) {
     printf("Error: cannot initialize the queue mutex.\n");
     return -1;
@@ -66,6 +71,7 @@ int rxp_task_queue_init (rxp_task_queue* queue) {
   queue->size = 0;
   queue->tasks = NULL;
   queue->last_task = NULL;
+  queue->is_init = 1;
 
   return 0;
 }
@@ -73,6 +79,11 @@ int rxp_task_queue_init (rxp_task_queue* queue) {
 int rxp_task_queue_shutdown(rxp_task_queue* queue) {
   
   if (!queue) { return -1; } 
+
+  if (-1 == queue->is_init) {
+    printf("Info task queue already shutdown.\n");
+    return 0;
+  }
 
   /* @todo in rxp_task_queue_shutdown, we should check if the mutex is actually initialized. */
   uv_mutex_destroy(&queue->mutex);
@@ -90,6 +101,7 @@ int rxp_task_queue_shutdown(rxp_task_queue* queue) {
   queue->size = 0;
   queue->tasks = NULL;
   queue->last_task = NULL;
+  queue->is_init = -1;
 
   return 0;
 }

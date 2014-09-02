@@ -16,11 +16,12 @@
 #define RXP_DEC_STATE_READY 0x0004         /* all packets have been decoded, file is closed */
 
 /* player states */
-#define RXP_PSTATE_NONE 0x0000             /* the player isn't doing anything */
-#define RXP_PSTATE_PLAYING 0x0001          /* we're playing */
-#define RXP_PSTATE_STOPPED 0x0002          /* when the user asked the player to stop. */
-#define RXP_PSTATE_PAUSED 0x0004           /* when the player is paused */
-#define RXP_PSTATE_DECODE_READY 0x0008     /* ready with decoding the file */
+#define RXP_PSTATE_NONE (1 << 0)             /* the player isn't doing anything */
+#define RXP_PSTATE_PLAYING (1 << 1)          /* we're playing */
+#define RXP_PSTATE_STOPPED (1 << 2)          /* when the user asked the player to stop. */
+#define RXP_PSTATE_PAUSED (1 << 3)           /* when the player is paused */
+#define RXP_PSTATE_DECODE_READY (1 << 4)     /* ready with decoding the file */
+#define RXP_PSTATE_SHUTTING_DOWN (1 << 5)    /* when rxp_player_clear() is called; only used to make sure tat someone doesn't call clear multiple times. */
 
 /* decoder events */
 #define RXP_DEC_EVENT_READY 0x0001         /* we're ready with decoding all packets; decoding may stop */

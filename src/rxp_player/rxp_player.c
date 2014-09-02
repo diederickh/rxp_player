@@ -16,8 +16,15 @@ static void rxp_player_reset(rxp_player* player);                               
 /* ---------------------------------------------------------------- */
 
 int rxp_player_init(rxp_player* player) {
-  
+
+  printf("++++ INIT\n");  
+
   if (!player) { return -1; } 
+
+  if (player->is_init == 1) {
+    printf("Info: you're trying to initialize a player which is already initialized.\n");
+    return 0;
+  }
 
   if (uv_mutex_init(&player->mutex) != 0) {
     printf("Error: cannot initialize the mutex for the player.\n");
@@ -66,6 +73,7 @@ int rxp_player_init(rxp_player* player) {
   player->on_video_frame = NULL;
   player->on_event = NULL;
   player->state = RXP_PSTATE_NONE;
+  player->is_init = 1;
 
   return 0;
 }
@@ -82,9 +90,34 @@ int rxp_player_clear(rxp_player* player) {
   */
   if (!player) { return -1; } 
 
-  if (player->state != RXP_PSTATE_NONE) {
-    printf("Warning: you're trying to clear a player which states has still some meaning: %d\n", player->state);
+  if (player->is_init == -1) {
+    printf("Info: player is already cleared.\n");
+    return 0;
   }
+  player->is_init = -1;
+
+  if ((player->state & RXP_PSTATE_SHUTTING_DOWN) == RXP_PSTATE_SHUTTING_DOWN) {
+    printf("Shutting down..\n");
+    return -102;
+  }
+
+  if (0 == rxp_player_has_state(player, RXP_PSTATE_SHUTTING_DOWN)) {
+    printf("We're in the process of shutting down. Did you call rxp_player_clear() already?\n");
+    return -101;
+  }
+  rxp_player_set_state(player, RXP_PSTATE_SHUTTING_DOWN);
+
+  /* when the player is still playing or is paused, we need to stop it first. */
+  if (0 == rxp_player_has_state(player, RXP_PSTATE_PLAYING) 
+      || 0 == rxp_player_has_state(player, RXP_PSTATE_PAUSED))
+  {
+    if (rxp_player_stop(player) < 0) {
+      printf("Error: failed to stop the player.\n");
+      return -100;
+    }
+  }
+  
+  printf("++++ CLEAR (state: %d), %p, is_init: %d\n", rxp_player_get_state(player), player, player->is_init);
 
   if (rxp_packet_queue_dealloc(&player->packets) < 0) {
     printf("Error: cannot deallocate the allocated video packets of the player.\n");
@@ -123,21 +156,21 @@ int rxp_player_clear(rxp_player* player) {
     }
   }
 
-  if (player->scheduler.state != RXP_SCHED_STATE_NONE) {
-    printf("Warning: the scheduler seems to be running. Did you call rxp_player_stop()?\n");
+  if (rxp_player_get_state(player) != RXP_PSTATE_SHUTTING_DOWN) {
+    printf("Warning: at this point the player should only have the shutting down state. This is not supposed to happen. Current state: %d.\n", rxp_player_get_state(player));
   }
 
   uv_mutex_destroy(&player->mutex);
-
+  
   player->last_used_pts = 0;
   player->total_audio_frames = 0;
   player->samplerate = 0;
   player->nchannels = 0;
   player->must_stop = 0;
-  player->state = RXP_PSTATE_NONE;
   player->user = NULL;
   player->on_video_frame = NULL;
   player->on_event = NULL;
+  player->state = RXP_PSTATE_NONE;
 
   return 0;
 }
@@ -156,6 +189,8 @@ int rxp_player_open(rxp_player* player, char* file) {
 }
 
 int rxp_player_play(rxp_player* player) {
+
+  printf("++++ PLAY\n");
 
   int state = 0;
   int r = 0;
@@ -201,6 +236,8 @@ int rxp_player_play(rxp_player* player) {
 
 int rxp_player_stop(rxp_player* player) {
 
+  printf("++++ STOP\n");
+
   int r = 0;
   int least_state = (RXP_PSTATE_PLAYING | RXP_PSTATE_PAUSED);
 
@@ -216,7 +253,8 @@ int rxp_player_stop(rxp_player* player) {
       r = -1;
     }
     else {
-      player->state = RXP_PSTATE_NONE;
+      player->state &= ~(RXP_PSTATE_PAUSED | RXP_PSTATE_PLAYING);
+      printf("STATE: %04X, player: %p\n", player->state, player);
     }
   }
   rxp_player_unlock(player);
@@ -346,12 +384,28 @@ void rxp_player_update(rxp_player* player) {
 
 int rxp_player_lock(rxp_player* player) {
   if (!player) { return -1; } 
+#if 0
+  if (1 != player->is_init) {
+    printf("Trying to lock the player mutex, but it's not initialized.\n");
+    return -1;
+  }
+#endif
+
   uv_mutex_lock(&player->mutex);
+
   return 0;
 }
 
 int rxp_player_unlock(rxp_player* player) {
   if (!player) { return -1; } 
+
+#if 0
+  if (1 != player->is_init) {
+    printf("Trying to unlock the player mutex, but it's not initialized.\n");
+    return -1;
+  }
+#endif
+
   uv_mutex_unlock(&player->mutex);
   return 0;
 }
@@ -418,13 +472,47 @@ int rxp_player_fill_audio_buffer(rxp_player* player,
 /* returns 0 when playing, else 1, or < 0 on error */
 int rxp_player_is_playing(rxp_player* p) {
   if (!p) { return -1; }
-  return (p->state & RXP_PSTATE_PLAYING) ? 0 : 1;
+  return (rxp_player_has_state(p, RXP_PSTATE_PLAYING) == 0) ? 0 : 1;
 }
 
 /* returns 0 when paused, else 1, or < 0 on error */
 int rxp_player_is_paused(rxp_player* p) {
   if (!p) { return -1; }
-  return (p->state & RXP_PSTATE_PAUSED) ? 0 : 1;
+  return (rxp_player_has_state(p, RXP_PSTATE_PAUSED) == 0) ? 0 : 1;
+}
+
+int rxp_player_set_state(rxp_player* p, int state) {
+  if (NULL == p) { return -1; } 
+  rxp_player_lock(p);
+  p->state |= state;
+  rxp_player_unlock(p);
+  return 0;
+}
+
+int rxp_player_unset_state(rxp_player* p, int state) {
+  if (NULL == p) { return -1; } 
+  rxp_player_lock(p);
+  p->state &= ~state;
+  rxp_player_unlock(p);
+  return 0;
+}
+
+int rxp_player_has_state(rxp_player* p, int state) {
+  if (NULL == p) { return -1; } 
+  int has_state = -1;
+  rxp_player_lock(p);
+  has_state = ((p->state & state) == state) ? 0 : -1;
+  rxp_player_unlock(p);
+  return has_state;
+}
+
+int rxp_player_get_state(rxp_player* p) {
+  if (NULL == p) { return -1; } 
+  int state = -1;
+  rxp_player_lock(p);
+  state = p->state;
+  rxp_player_unlock(p);
+  return state;
 }
 
 /* ---------------------------------------------------------------- */
@@ -662,7 +750,7 @@ static void rxp_player_reset(rxp_player* player) {
 
   rxp_player_lock(player);
   {
-    player->state = RXP_PSTATE_NONE;
+    player->state &= ~(RXP_PSTATE_PLAYING | RXP_PSTATE_PAUSED);
     rxp_clock_stop(&player->clock);
   }
   rxp_player_unlock(player);
@@ -673,3 +761,4 @@ static void rxp_player_reset(rxp_player* player) {
 
   player->must_stop = 0;
 }
+
