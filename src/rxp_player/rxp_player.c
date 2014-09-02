@@ -66,7 +66,6 @@ int rxp_player_init(rxp_player* player) {
   player->on_video_frame = NULL;
   player->on_event = NULL;
   player->state = RXP_PSTATE_NONE;
-  player->is_init = 1;
 
   return 0;
 }
@@ -77,12 +76,11 @@ int rxp_player_clear(rxp_player* player) {
 
   /* @todo - how to do we handle situations where the user calls 
              rxp_player_clear but e.g. the scheduler is still playing? do 
-             we stop it and join the thread? */
+             we stop it and join the thread? 
+             now this is done indirectly by rxp_player_stop(), which stops
+             the scheduler and joins the thread
+  */
   if (!player) { return -1; } 
-
-  if (player->is_init != 1) {
-    printf("NOT INITIALIZED\n");
-  }
 
   if (player->state != RXP_PSTATE_NONE) {
     printf("Warning: you're trying to clear a player which states has still some meaning: %d\n", player->state);
@@ -92,12 +90,12 @@ int rxp_player_clear(rxp_player* player) {
     printf("Error: cannot deallocate the allocated video packets of the player.\n");
     return -2;
   }
-  
+
   if (rxp_scheduler_clear(&player->scheduler) < 0) {
     printf("Error: the player cannot dealloc the scheduler.\n");
     return -3;
   }
-  
+
   if (rxp_decoder_clear(&player->decoder) < 0) {
     printf("Error: the player cannot dealloc the decoder.\n");
     return -4;
@@ -125,6 +123,10 @@ int rxp_player_clear(rxp_player* player) {
     }
   }
 
+  if (player->scheduler.state != RXP_SCHED_STATE_NONE) {
+    printf("Warning: the scheduler seems to be running. Did you call rxp_player_stop()?\n");
+  }
+
   uv_mutex_destroy(&player->mutex);
 
   player->last_used_pts = 0;
@@ -136,7 +138,6 @@ int rxp_player_clear(rxp_player* player) {
   player->user = NULL;
   player->on_video_frame = NULL;
   player->on_event = NULL;
-  player->is_init = 0;
 
   return 0;
 }
@@ -157,6 +158,7 @@ int rxp_player_open(rxp_player* player, char* file) {
 int rxp_player_play(rxp_player* player) {
 
   int state = 0;
+  int r = 0;
 
   if (!player) { return -1; } 
 
@@ -187,8 +189,14 @@ int rxp_player_play(rxp_player* player) {
   if (rxp_clock_start(&player->clock) < 0) {
     return -2;
   }
+  
+  r = rxp_scheduler_play(&player->scheduler);
+  if (r < 0) {
+    printf("Error: the scheduler returned an error: %d\n", r);
+    exit(0);
+  }
 
-  return rxp_scheduler_play(&player->scheduler);
+  return r;
 }
 
 int rxp_player_stop(rxp_player* player) {
@@ -196,7 +204,9 @@ int rxp_player_stop(rxp_player* player) {
   int r = 0;
   int least_state = (RXP_PSTATE_PLAYING | RXP_PSTATE_PAUSED);
 
-  if (!player) { return -1; } 
+  if (!player) { 
+    return -1; 
+  } 
 
   /* check if we're in the correct state */
   rxp_player_lock(player);
@@ -224,7 +234,13 @@ int rxp_player_stop(rxp_player* player) {
     }
   }
 
-  return rxp_scheduler_stop(&player->scheduler);
+  r = rxp_scheduler_stop(&player->scheduler);
+  if (r < 0) {
+    printf("Error: something went wrong when trying to stop the scheduler.\n");
+    return r;
+  }
+
+  return 0;
 }
 
 int rxp_player_pause(rxp_player* player) {
@@ -267,6 +283,7 @@ void rxp_player_update(rxp_player* player) {
 
   /* when we're not playing, don't do anything */
   if ( !(state & RXP_PSTATE_PLAYING) ) {
+    printf("Not playing.\n");
     return ;
   }
 

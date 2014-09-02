@@ -19,7 +19,7 @@
 #define RXP_PSTATE_NONE 0x0000             /* the player isn't doing anything */
 #define RXP_PSTATE_PLAYING 0x0001          /* we're playing */
 #define RXP_PSTATE_STOPPED 0x0002          /* when the user asked the player to stop. */
-#define RXP_PSTATE_PAUSED 0x0004           /* when the player is stopped */
+#define RXP_PSTATE_PAUSED 0x0004           /* when the player is paused */
 #define RXP_PSTATE_DECODE_READY 0x0008     /* ready with decoding the file */
 
 /* decoder events */

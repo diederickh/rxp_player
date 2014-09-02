@@ -23,6 +23,7 @@ namespace rxp {
     on_event = NULL;
     on_video_frame = NULL;
     user = NULL;
+    is_init = false;
   }
 
   int Player::init(std::string filepath) {
@@ -119,9 +120,14 @@ namespace rxp {
 
   int Player::stop() {
 
+    if (0 != isPlaying()) {
+      printf("Info: cannot stop the player, we're not playing. \n");
+      return -1;
+    }
+
     if (0 != rxp_player_stop(&ctx)) {
       printf("Error: cannot stop the video playback.\n");
-      return -1;
+      return -2;
     }
 
     return 0;

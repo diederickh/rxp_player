@@ -70,7 +70,6 @@ struct rxp_player {
   int nchannels;                                                                           /* the number of audio channels of the audio stream when found */
   int state;                                                                               /* the player state */
   int must_stop;                                                                           /* this is set to 1 in the rxp_player_fill_audio_buffer() when there is no audio left to play back and we should stop playing. We cannot simply dealloc/clear/reset everything in the audio callback becuase that function is not allowed to take too much time */
-  int is_init;
 
   /* callback */
   void* user;
@@ -81,7 +80,7 @@ struct rxp_player {
 int rxp_player_init(rxp_player* player);                                                   /* initialize all of the members */
 int rxp_player_clear(rxp_player* player);                                                  /* frees all allocated memory and resets state to what it was before init() */
 int rxp_player_open(rxp_player* player, char* file);                                       /* open a .ogg file */
-int rxp_player_play(rxp_player* player);                                                   /* start playing. it's important to know that this will add a play task to the scheduler which will fire the play event only when it has decoded a couple of frames, so the playback will be smooth */
+int rxp_player_play(rxp_player* player);                                                   /* start playing. returns 0 on success. it's important to know that this will add a play task to the scheduler which will fire the play event only when it has decoded a couple of frames, so the playback will be smooth */
 int rxp_player_pause(rxp_player* player);                                                  /* pause the player, returns < 0 on error, 0 on success, 1 when not playing */
 int rxp_player_stop(rxp_player* player);                                                   /* stop playing, also stops the scheduler; basically resets all state to default, calling the appropriate callbacks and events. */
 int rxp_player_lock(rxp_player* player);                                                   /* whenever you need to use any of the internal members make sure to lock/unlock the player. */
