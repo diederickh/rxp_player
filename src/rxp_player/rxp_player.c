@@ -234,6 +234,7 @@ int rxp_player_stop(rxp_player* player) {
     }
   }
 
+  /* this will force a join with the scheduler thread. */
   r = rxp_scheduler_stop(&player->scheduler);
   if (r < 0) {
     printf("Error: something went wrong when trying to stop the scheduler.\n");
@@ -283,7 +284,6 @@ void rxp_player_update(rxp_player* player) {
 
   /* when we're not playing, don't do anything */
   if ( !(state & RXP_PSTATE_PLAYING) ) {
-    printf("Not playing.\n");
     return ;
   }
 
@@ -456,6 +456,7 @@ static int rxp_player_on_play(rxp_scheduler* scheduler) {
   return 0;
 }
 
+/* gets called by the scheduler when it's stopped. */
 static int rxp_player_on_stop(rxp_scheduler* scheduler) {
   rxp_player* p = (rxp_player*) scheduler->user;
   rxp_player_reset(p);

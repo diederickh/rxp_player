@@ -172,6 +172,13 @@ int rxp_scheduler_stop(rxp_scheduler* s) {
     s->state &= ~(RXP_SCHED_STATE_DECODING | RXP_SCHED_STATE_STARTED);
   rxp_scheduler_unlock(s);
 
+  /* if there is a stop handler, call it now. */
+  if (s->stop) {
+    if (s->stop(s) < 0) {
+      printf("Error: cannot handle the stop task. RXP_TASK_STOP failed.\n");
+    }
+  }
+
   return 0;
 }
 
@@ -413,11 +420,13 @@ static void rxp_scheduler_handle_task(rxp_scheduler* s, rxp_task* task) {
       break;
     }
     case RXP_TASK_STOP: {
-      if (s->stop) {
-        if (s->stop(s) < 0) {
-          printf("Error: cannot handle the stop task. RXP_TASK_STOP failed.\n");
-        }
-      }
+      /* 
+         Gracefully ignore the stop task; as it will stop the thread. 
+         In rxp_scheduler_stop(), the stop callback is called once the 
+         thread has been shutdown. By calling stop there we will have
+         less risk for inter-thread issues.
+      */
+
       break;
     };
     default: {

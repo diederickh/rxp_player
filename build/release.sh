@@ -17,8 +17,8 @@ cmake --build . --target install
 
 if [ "$(uname)" == "Darwin" ] ; then 
     cd ./../../install/mac-clang-x86_64/bin/
-    #./rxp_glfw_player
-    ./rxp_cpp_glfw_player
+    ./rxp_glfw_player
+    #./rxp_cpp_glfw_player
     
 else 
     cd ./../../install/linux-gcc-x86_64/bin/
