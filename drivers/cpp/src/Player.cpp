@@ -84,7 +84,7 @@ namespace rxp {
   int Player::shutdown() {
     
     if (false == is_init) {
-      printf("Info: it looks like you didn't initialize the player or already shutdown the player..");
+      printf("Info: it looks like you didn't initialize the player or already shutdown the player.\n");
       return -1;
     }
 
@@ -100,7 +100,7 @@ namespace rxp {
   int Player::play() {
 
     if (0 != rxp_player_play(&ctx)) {
-      printf("Error: cannot start playing.");
+      printf("Error: cannot start playing.\n");
       return -1;
     }
 
@@ -110,7 +110,7 @@ namespace rxp {
   int Player::pause() {
 
     if (0 != rxp_player_pause(&ctx)) {
-      printf("Error: cannot pause the video playback.");
+      printf("Error: cannot pause the video playback.\n");
       return -1;
     }
 
@@ -120,7 +120,7 @@ namespace rxp {
   int Player::stop() {
 
     if (0 != rxp_player_stop(&ctx)) {
-      printf("Error: cannot stop the video playback.");
+      printf("Error: cannot stop the video playback.\n");
       return -1;
     }
 
@@ -141,7 +141,7 @@ namespace rxp {
 
     Player* p = static_cast<Player*>(player->user);
     if (NULL == p) {
-      printf("Error: cannot get a handle to the player.");
+      printf("Error: cannot get a handle to the player.\n");
       return;
     }
 

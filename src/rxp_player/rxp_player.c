@@ -8,7 +8,7 @@ static int rxp_player_on_close_file(rxp_scheduler* scheduler);                  
 static int rxp_player_on_stop(rxp_scheduler* scheduler);                                            /* is called when the scheduler thread stopped. */
 static int rxp_player_on_play(rxp_scheduler* scheduler);                                            /* is called by the scheduler when it handles a play task. */
 static void rxp_player_on_decoder_event(rxp_decoder* decoder, int event);                           /* is called by the decoder when something "special" happens. */
-static int rxp_player_on_decode(rxp_scheduler* scheduler, uint64_t goalpts);                                          /* is called by the scheduler when we need to decode a frame (audio and/or video). */
+static int rxp_player_on_decode(rxp_scheduler* scheduler, uint64_t goalpts);                        /* is called by the scheduler when we need to decode a frame (audio and/or video). */
 static void rxp_player_on_theora_frame(rxp_decoder* decoder, uint64_t pts, th_ycbcr_buffer buffer); /* is called by the decoder when it decoded a theora frame */
 static void rxp_player_on_audio(rxp_decoder* decoder, float** pcm, int nsamples);                   /* is called by the decoder when it decoded some audio samples */
 static void rxp_player_reset(rxp_player* player);                                                   /* when we're ready playing all video/audio packets this cleans up internal state */
@@ -111,6 +111,7 @@ int rxp_player_clear(rxp_player* player) {
   }
   
   if (player->audio_buffer.capacity > 0) {
+    printf("info: clearing the audio ringbuffer.\n");
     if (rxp_ringbuffer_clear(&player->audio_buffer) < 0) {
       printf("Error: cannot free the audio buffer.\n");
       return -7;
