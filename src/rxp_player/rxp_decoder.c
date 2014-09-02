@@ -38,6 +38,11 @@ rxp_decoder* rxp_decoder_alloc() {
 int rxp_decoder_init(rxp_decoder* d) {
   
   if (!d) { return -1; } 
+
+  if (1 == d->is_init) {
+    printf("Info: already initialized, ignoring. Maybe call rxp_decoder_clear first.\n");
+    return 0;
+  }
   
   if (rxp_theora_init(&d->theora) < 0) {
     printf("Error: cannot initialize theora decoder.\n");
@@ -62,6 +67,7 @@ int rxp_decoder_init(rxp_decoder* d) {
   d->state = RXP_NONE;          
   d->samplerate = 0;
   d->nchannels = 0;
+  d->is_init = 1;
 
   return 0;
 }
@@ -73,6 +79,10 @@ int rxp_decoder_clear(rxp_decoder* d) {
   rxp_stream* next_stream = NULL;
 
   if (!d) { return -1; } 
+  if (-1 == d->is_init) {
+  printf("Info: rxp_decoder already cleared. \n");
+  return 0;
+  }
 
   stream = d->streams;
 
@@ -97,13 +107,18 @@ int rxp_decoder_clear(rxp_decoder* d) {
   th_info_clear(&d->theora.info);
 
   /* clear vorbis related */
-  vorbis_block_clear(&d->vorbis.block);
-  vorbis_dsp_clear(&d->vorbis.state);
+  if (d->vorbis.is_dsp_init == 1) {
+    vorbis_block_clear(&d->vorbis.block);
+    vorbis_dsp_clear(&d->vorbis.state);
+    d->vorbis.is_dsp_init = -1;
+  }
+
   vorbis_comment_clear(&d->vorbis.comment);
   vorbis_info_clear(&d->vorbis.info);
 
   d->streams = NULL;
   d->state = RXP_NONE;
+  d->is_init = -1;
 
   return 0;
 }
@@ -259,6 +274,7 @@ static int rxp_vorbis_init(rxp_vorbis* v) {
 
   if (!v) { return -1; } 
   
+  v->is_dsp_init = -1;
   v->num_header_packets = 0;
 
   vorbis_info_init(&v->info);
@@ -413,6 +429,10 @@ static int rxp_decoder_decode_vorbis(rxp_decoder* decoder, rxp_stream* stream, o
 
     /* when all header packets read, init decoder */
     if (v->num_header_packets == 3) {
+      
+      if (v->is_dsp_init == 1) {
+        printf("Info: looks like the dsp was already initialized. Ignoring this for now.\n");
+      }
 
       if (vorbis_synthesis_init(&v->state, &v->info) != 0) {
         printf("Error: cannot initialize vorbis.\n");
@@ -423,6 +443,8 @@ static int rxp_decoder_decode_vorbis(rxp_decoder* decoder, rxp_stream* stream, o
         printf("Error: cannot initialize the vorbis block.\n");
         return -3;
       }
+
+      v->is_dsp_init = 1;
 
       return rxp_decoder_set_audio_info(decoder, v->info.rate, v->info.channels);
     }

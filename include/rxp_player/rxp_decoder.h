@@ -61,6 +61,7 @@ struct rxp_vorbis {
   vorbis_dsp_state state;
   vorbis_block block;
   int num_header_packets;
+  int is_dsp_init;                                                                                 /* is set to 1 when `vorbis_synthesis_init()` has been called on the state and block and we can call vorbis_block_clear() and vorbis_sdp_clear. */
 };
 
 struct rxp_stream {
@@ -84,6 +85,7 @@ struct rxp_decoder {
   int state;                                                                                       /* the current state */
   uint64_t samplerate;                                                                             /* @todo: not sure if we need to store this here ... it's in player where we need it .. maybe pass it into callback (?) - when we find an audio stream, we set the samplerate and fire the RXP_DEC_EVENT_AUDIO_INFO event - UPDATE: I think it might be worth having here as we use it now (as experiment) to calculate the pts for the audio stream */
   int nchannels;                                                                                   /* @todo: not sure if we need to store this here .... "" "" - number of audio channels found */
+  int is_init;                                                                                     /* 1 when init, else -1 */
   void* user;                                                                                      /* can be set to anything by the user */
   theora_frame_callback on_theora;                                                                 /* will be called when we've decoded a theora frame */
   decoder_audio_callback on_audio;                                                                 /* will be called when we've decoded some audio */

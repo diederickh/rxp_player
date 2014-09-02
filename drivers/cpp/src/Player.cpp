@@ -92,9 +92,10 @@ namespace rxp {
       printf("Info: it looks like you didn't initialize the player or already shutdown the player.\n");
       return -1;
     }
-    printf("IS_INIT: %d\n", is_init);
-    is_init = false;
 
+    is_init = false;
+    is_playing = false;
+    is_paused = false;
 
     if (0 != rxp_player_clear(&ctx)) {
       printf("Error: cannot clear/shutdown the player.\n");

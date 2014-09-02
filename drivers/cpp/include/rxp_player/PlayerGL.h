@@ -114,8 +114,9 @@ namespace rxp {
     int play();
     int pause();
     int stop();
-    int isPlaying();
-    int isPaused();
+    int isInit();                                                           /* returns 0 when init, else < 0 */
+    int isPlaying();                                                        /* returns 0 when playing, else < 0 */ 
+    int isPaused();                                                         /* returns 0 when paused, else < 0 */
 
   public:
     Player ctx;                                                             /* the CPP player wrapper. */
@@ -159,6 +160,10 @@ namespace rxp {
 
   inline int PlayerGL::isPlaying() {
     return ctx.isPlaying();
+  }
+
+  inline int PlayerGL::isInit() {
+    return ctx.isInit();
   }
 
   inline int PlayerGL::isPaused() {
