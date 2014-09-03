@@ -24,6 +24,7 @@ struct rxp_ringbuffer {
   uint32_t tail;                                                           /* the position in the buffer where we start reading */
   uint32_t capacity;                                                       /* the allocated bytes of `buffer` */
   uint32_t nbytes;                                                         /* how many bytes have been written into the buffer */
+  int is_init;                                                             /* 1 = yes, -1 = no */
 };
 
 int rxp_ringbuffer_init(rxp_ringbuffer* rb, uint32_t nbytes);               /* allocate the internal buffer with nbytes of bytes*/
