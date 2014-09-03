@@ -229,7 +229,7 @@ void rxp_scheduler_update(rxp_scheduler* s) {
   }
 
   /* update the goal pts */
-  rxp_scheduler_update_goal_pts(s, (5 * 1000ull * 1000ull * 1000ull));
+  rxp_scheduler_update_goal_pts(s, (10 * 1000ull * 1000ull * 1000ull));
 }
 
 /* tell the scheduler up until what pts we've decoded either video or 

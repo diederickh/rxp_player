@@ -27,7 +27,8 @@ struct rxp_ringbuffer {
   int is_init;                                                             /* 1 = yes, -1 = no */
 };
 
-int rxp_ringbuffer_init(rxp_ringbuffer* rb, uint32_t nbytes);               /* allocate the internal buffer with nbytes of bytes*/
+int rxp_ringbuffer_init(rxp_ringbuffer* rb);                                /* initializes the struct; sets all members to defaults. when you initialized and/or allocated data, make sure to call rxp_ringbuffer_clear first or you'll be leaking memory. */
+int rxp_ringbuffer_allocate(rxp_ringbuffer* rb, uint32_t nbytes);           /* allocate the internal buffer with nbytes of bytes*/
 int rxp_ringbuffer_clear(rxp_ringbuffer* rb);                               /* frees allocated memory + calls rxp_ringbuffer_reset() */
 int rxp_ringbuffer_write(rxp_ringbuffer* rb, void* data, uint32_t nbytes);  /* write some data into the buffer */
 int rxp_ringbuffer_read(rxp_ringbuffer* rb, void* data, uint32_t nbytes);   /* read some data. returns < 0 when there is not enough data in the buffer. */

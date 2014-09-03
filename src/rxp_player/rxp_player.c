@@ -49,7 +49,7 @@ int rxp_player_init(rxp_player* player) {
     return -7;
   }
 
-  if (rxp_ringbuffer_reset(&player->audio_buffer) < 0) {
+  if (rxp_ringbuffer_init(&player->audio_buffer) < 0) {
     return -8;
   }
 
@@ -714,7 +714,7 @@ static void rxp_player_on_decoder_event(rxp_decoder* decoder, int event) {
       player->samplerate = decoder->samplerate;
       player->nchannels = decoder->nchannels;
       rxp_clock_set_samplerate(&player->clock, decoder->samplerate);
-      rxp_ringbuffer_init(&player->audio_buffer, 1024 * 1024 * 5); 
+      rxp_ringbuffer_allocate(&player->audio_buffer, 1024 * 1024 * 5); 
     }
     rxp_player_unlock(player);
 

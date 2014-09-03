@@ -1,8 +1,23 @@
 #include <string.h>
 #include <rxp_player/rxp_ringbuffer.h>
 
+/* initialize a ringbuffer - sets default members, if you allocated something make sure to call clear() first. . */
+int rxp_ringbuffer_init(rxp_ringbuffer* rb) {
+
+  if (!rb) { return -1; } 
+  
+  rb->buffer = NULL;
+  rb->head = 0;
+  rb->tail = 0;
+  rb->capacity = 0;
+  rb->nbytes = 0;
+  rb->is_init = 1;
+  
+  return 0;
+}
+
 /* allocate a new buffer for nbytes */
-int rxp_ringbuffer_init(rxp_ringbuffer* rb, uint32_t nbytes) {
+int rxp_ringbuffer_allocate(rxp_ringbuffer* rb, uint32_t nbytes) {
 
   if (!rb) { return -1; } 
   if (!nbytes) { return -2; } 
@@ -17,14 +32,14 @@ int rxp_ringbuffer_init(rxp_ringbuffer* rb, uint32_t nbytes) {
     printf("Error: cannot allocated the ring buffer.\n");
     return -3;
   }
-
+  
   memset((void*)rb->buffer, 0x00, nbytes);
 
   rb->head = 0;
   rb->tail = 0;
   rb->capacity = nbytes;
   rb->nbytes = 0;
-  rb->is_init = 1;
+
 
   return 0;
 }
@@ -110,7 +125,7 @@ int rxp_ringbuffer_clear(rxp_ringbuffer* rb) {
     printf("Info: ringbuffer not initialized so we're not clearing it. ignoring request.\n");
     return 0;
   }
-
+  printf("free! %d\n", rb->is_init);
   free(rb->buffer);
   rb->buffer = NULL;
   rb->capacity = 0;
