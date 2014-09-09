@@ -83,6 +83,7 @@ struct rxp_scheduler {
 };
 
 rxp_scheduler* rxp_scheduler_alloc();                                                 /* allocate a rxp_scheduler on the heap. you can use this or create one on the stack and call `rxp_scheduler_init()`. when you allocate a scheduler with this function we will initialize if for you.*/                                     
+int rxp_scheduler_reset(rxp_scheduler* s); /* only call once, before init; sets the initial members */
 void rxp_scheduler_update(rxp_scheduler* s);                                          /* call this often, this will add new decode tasks when necessary */
 int rxp_scheduler_init(rxp_scheduler* s);                                             /* init all members of the scheduler, call this if you created a scheduler on the stack. */
 int rxp_scheduler_clear(rxp_scheduler* s);                                            /* clear all allocated memory and reset the state. if you want to reuse the scheduler again, make sure to call `rxp_scheduler_init` again. */

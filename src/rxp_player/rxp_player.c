@@ -19,7 +19,7 @@ int rxp_player_init(rxp_player* player) {
 
   if (!player) { return -1; } 
 
-  if (player->is_init == 1) {
+  if (player->is_init == 0xCAFEBABE) {
     printf("Info: you're trying to initialize a player which is already initialized.\n");
     return 0;
   }
@@ -71,7 +71,7 @@ int rxp_player_init(rxp_player* player) {
   player->on_video_frame = NULL;
   player->on_event = NULL;
   player->state = RXP_PSTATE_NONE;
-  player->is_init = 1;
+  player->is_init = 0xCAFEBABE;
 
   return 0;
 }
@@ -88,11 +88,11 @@ int rxp_player_clear(rxp_player* player) {
   */
   if (!player) { return -1; } 
 
-  if (player->is_init == -1) {
+  if (player->is_init == 0xDEADBEEF) {
     printf("Info: player is already cleared.\n");
     return 0;
   }
-  player->is_init = -1;
+  player->is_init = 0xDEADBEEF;
 
   if (0 == rxp_player_has_state(player, RXP_PSTATE_SHUTTING_DOWN)) {
     printf("We're in the process of shutting down. Did you call rxp_player_clear() already?\n");
@@ -371,7 +371,7 @@ void rxp_player_update(rxp_player* player) {
 int rxp_player_lock(rxp_player* player) {
   if (!player) { return -1; } 
 #if 0
-  if (1 != player->is_init) {
+  if (0xCAFEBABE != player->is_init) {
     printf("Trying to lock the player mutex, but it's not initialized.\n");
     return -1;
   }
@@ -386,7 +386,7 @@ int rxp_player_unlock(rxp_player* player) {
   if (!player) { return -1; } 
 
 #if 0
-  if (1 != player->is_init) {
+  if (0xCAFEBABE != player->is_init) {
     printf("Trying to unlock the player mutex, but it's not initialized.\n");
     return -1;
   }

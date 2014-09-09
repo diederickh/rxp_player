@@ -53,7 +53,7 @@ int rxp_task_queue_init (rxp_task_queue* queue) {
  
   if (!queue) { return -1; } 
 
-  if (1 == queue->is_init) {
+  if (0xCAFEBABE == queue->is_init) {
     printf("Info: task queue already initialized.\n");
     return 0;
   }
@@ -71,7 +71,7 @@ int rxp_task_queue_init (rxp_task_queue* queue) {
   queue->size = 0;
   queue->tasks = NULL;
   queue->last_task = NULL;
-  queue->is_init = 1;
+  queue->is_init = 0xCAFEBABE;
 
   return 0;
 }
@@ -80,7 +80,7 @@ int rxp_task_queue_shutdown(rxp_task_queue* queue) {
   
   if (!queue) { return -1; } 
 
-  if (-1 == queue->is_init) {
+  if (0xDEADBEEF == queue->is_init) {
     printf("Info task queue already shutdown.\n");
     return 0;
   }
@@ -101,7 +101,7 @@ int rxp_task_queue_shutdown(rxp_task_queue* queue) {
   queue->size = 0;
   queue->tasks = NULL;
   queue->last_task = NULL;
-  queue->is_init = -1;
+  queue->is_init = 0xDEADBEEF;
 
   return 0;
 }

@@ -6,12 +6,17 @@ int rxp_ringbuffer_init(rxp_ringbuffer* rb) {
 
   if (!rb) { return -1; } 
   
+  if (0xCAFEBABE == rb->is_init) {
+    printf("Error: trying to initialize a rxp_ringbuffer that is already initialized.\n");
+    return -1;
+  }
+  
   rb->buffer = NULL;
   rb->head = 0;
   rb->tail = 0;
   rb->capacity = 0;
   rb->nbytes = 0;
-  rb->is_init = 1;
+  rb->is_init = 0xCAFEBABE;
   
   return 0;
 }
@@ -22,8 +27,8 @@ int rxp_ringbuffer_allocate(rxp_ringbuffer* rb, uint32_t nbytes) {
   if (!rb) { return -1; } 
   if (!nbytes) { return -2; } 
 
-  if (rb->is_init == 1) {
-    printf("Info: the ringbuffer is already initialized. ignoring request.\n");
+  if (0xCAFEBABE == rb->is_init) {
+    printf("Info: the ringbuffer is already initialized. ignoring request. first call rxp_ringbuffer_clear\n");
     return 0;
   }
 
@@ -121,7 +126,7 @@ int rxp_ringbuffer_clear(rxp_ringbuffer* rb) {
   if (!rb) { return -1; } 
   if (!rb->buffer) { return -2; } 
   
-  if (rb->is_init != 1) {
+  if (0xCAFEBABE != rb->is_init) {
     printf("Info: ringbuffer not initialized so we're not clearing it. ignoring request.\n");
     return 0;
   }
@@ -129,7 +134,7 @@ int rxp_ringbuffer_clear(rxp_ringbuffer* rb) {
   free(rb->buffer);
   rb->buffer = NULL;
   rb->capacity = 0;
-  rb->is_init = -1;
+  rb->is_init = 0xDEADBEEF;
 
   return rxp_ringbuffer_reset(rb);
 }

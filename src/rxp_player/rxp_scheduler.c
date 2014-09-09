@@ -31,11 +31,15 @@ rxp_scheduler* rxp_scheduler_alloc() {
   return s;
 }
 
+int rxp_scheduler_reset(rxp_scheduler* s) {
+  return 0;
+}
+
 int rxp_scheduler_clear(rxp_scheduler* s) {
 
   if (!s) { return -1; }
   
-  if (-1 == s->is_init) {
+  if (0xDEADBEEF == s->is_init) {
     printf("Info: you're trying to clear a scheduler which is already deinitialized.\n");
     return 0;
   }
@@ -56,7 +60,7 @@ int rxp_scheduler_clear(rxp_scheduler* s) {
   s->played_pts = 0;
   s->state = RXP_SCHED_STATE_NONE;
   s->thread = 0;
-  s->is_init = -1;
+  s->is_init = 0xDEADBEEF;
   
   uv_mutex_destroy(&s->mutex);
 
@@ -72,7 +76,7 @@ int rxp_scheduler_init(rxp_scheduler* s) {
 
   if (!s) { return -1; } 
 
-  if (1 == s->is_init) {
+  if (0xCAFEBABE == s->is_init) {
     printf("Info: you're trying to initialize a scheduler which is already initialized.\n");
     return 0;
   }
@@ -89,7 +93,7 @@ int rxp_scheduler_init(rxp_scheduler* s) {
   s->decoded_pts = 0;
   s->played_pts = 0;
   s->state = RXP_SCHED_STATE_NONE;
-  s->is_init = 1;
+  s->is_init = 0xCAFEBABE;
   
   if (uv_mutex_init(&s->mutex) != 0) {
     printf("Error: cannot initialze the mutex for scheduler.\n");
@@ -398,6 +402,8 @@ static void rxp_scheduler_thread(void* scheduler) {
 }
 
 static void rxp_scheduler_handle_task(rxp_scheduler* s, rxp_task* task) {
+
+
 
   switch (task->type) {
     case RXP_TASK_DECODE: {

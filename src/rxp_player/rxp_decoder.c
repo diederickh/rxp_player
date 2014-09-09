@@ -21,7 +21,7 @@ static int rxp_decoder_set_audio_info(rxp_decoder* decoder, uint64_t samplerate,
 /* ---------------------------------------------------------------- */
 
 rxp_decoder* rxp_decoder_alloc() {
-
+  
   rxp_decoder* d = (rxp_decoder*)malloc(sizeof(rxp_decoder));
   if (!d) {
     printf("Error: cannot allocate the decoder.\n");
@@ -36,10 +36,10 @@ rxp_decoder* rxp_decoder_alloc() {
 }
 
 int rxp_decoder_init(rxp_decoder* d) {
-  
+
   if (!d) { return -1; } 
 
-  if (1 == d->is_init) {
+  if (0xCAFEBABE == d->is_init) {
     printf("Info: already initialized, ignoring. Maybe call rxp_decoder_clear first.\n");
     return 0;
   }
@@ -54,6 +54,7 @@ int rxp_decoder_init(rxp_decoder* d) {
     return -3;
   }
 
+  memset((char*)&d->sync_state, 0x00, sizeof(ogg_sync_state));
   if (ogg_sync_init(&d->sync_state) != 0) {
     printf("Error: cannot initialize the ogg sync state.\n");
     return -4;
@@ -67,7 +68,7 @@ int rxp_decoder_init(rxp_decoder* d) {
   d->state = RXP_NONE;          
   d->samplerate = 0;
   d->nchannels = 0;
-  d->is_init = 1;
+  d->is_init = 0xCAFEBABE;
 
   return 0;
 }
@@ -79,9 +80,9 @@ int rxp_decoder_clear(rxp_decoder* d) {
   rxp_stream* next_stream = NULL;
 
   if (!d) { return -1; } 
-  if (-1 == d->is_init) {
-  printf("Info: rxp_decoder already cleared. \n");
-  return 0;
+  if (0xDEADBEEF == d->is_init) {
+    printf("Info: rxp_decoder already cleared. \n");
+    return 0;
   }
 
   stream = d->streams;
@@ -107,10 +108,10 @@ int rxp_decoder_clear(rxp_decoder* d) {
   th_info_clear(&d->theora.info);
 
   /* clear vorbis related */
-  if (d->vorbis.is_dsp_init == 1) {
+  if (0xCAFEBABE == d->vorbis.is_dsp_init) {
     vorbis_block_clear(&d->vorbis.block);
     vorbis_dsp_clear(&d->vorbis.state);
-    d->vorbis.is_dsp_init = -1;
+    d->vorbis.is_dsp_init = 0xDEADBEEF;
   }
 
   vorbis_comment_clear(&d->vorbis.comment);
@@ -118,7 +119,7 @@ int rxp_decoder_clear(rxp_decoder* d) {
 
   d->streams = NULL;
   d->state = RXP_NONE;
-  d->is_init = -1;
+  d->is_init = 0xDEADBEEF;
 
   return 0;
 }
@@ -157,18 +158,31 @@ int rxp_decoder_open_file(rxp_decoder* decoder, char* filepath) {
   }
 
   /* find size */
-  fseek(decoder->fp, 0, SEEK_END);
+  if (0 != fseek(decoder->fp, 0, SEEK_END)) {
+    printf("Error: failed to seek the end of the video file.\n");
+    return -4;
+  }
+
   size = ftell(decoder->fp);
-  fseek(decoder->fp, 0, SEEK_SET);
+  if (-1L == size) {
+    printf("Error: failed to get the SEEK_END position from the video file.\n");
+    return -5;
+    
+  }
+
+  if (0 != fseek(decoder->fp, 0, SEEK_SET)) {
+    printf("Error: failed to set the SEEK_SET position of the video file.\n");
+    return -6;
+  }
 
   if (size <= 0) {
     printf("Error: the file is empty.\n");
-    return -4;
+    return -7;
   }
 
   decoder->file_size = size;
   decoder->state |= RXP_DEC_STATE_DECODING;
-
+  
   return 0;
 }
 
@@ -199,6 +213,11 @@ int rxp_decoder_decode(rxp_decoder* decoder) {
 
   if (!decoder) { return -1; }
   if (!decoder->fp) { return -2; } 
+
+  if (0xCAFEBABE != decoder->is_init) {
+    printf("Error: trying to decode, but the decoder is not initialized.\n");
+    return -100;
+  }
 
   /* reaad an page */
   if (rxp_decoder_read_oggpage(decoder, &page) < 0) {
@@ -251,7 +270,7 @@ int rxp_decoder_decode(rxp_decoder* decoder) {
       return -8;
     }
   } while (ogg_stream_packetout(&stream->stream_state, &packet) == 1);
-
+  
   return 0;
 }
 
@@ -274,7 +293,7 @@ static int rxp_vorbis_init(rxp_vorbis* v) {
 
   if (!v) { return -1; } 
   
-  v->is_dsp_init = -1;
+  v->is_dsp_init = 0xDEADBEEF; /* is set to 0xCAFEBABE when we get the first pages */
   v->num_header_packets = 0;
 
   vorbis_info_init(&v->info);
@@ -286,7 +305,7 @@ static int rxp_vorbis_init(rxp_vorbis* v) {
 /* returns < 0, on error or when we reached the end of the file */
 static int rxp_decoder_read_oggpage(rxp_decoder* decoder, ogg_page* page) {
 
-  static size_t ntotal = 0;
+  static size_t ntotal = 0; /* @todo - I guess we can remove this? */
   int r = 0;
   size_t read = 0;
 
@@ -299,7 +318,7 @@ static int rxp_decoder_read_oggpage(rxp_decoder* decoder, ogg_page* page) {
     printf("Error: cannot read an oggpage, file hasn't been opened.\n");
     return -2;
   }
-
+  
   while (ogg_sync_pageout(&decoder->sync_state, page) != 1) {
 
     /* obtain some memory that we can use to store the file data */
@@ -312,7 +331,7 @@ static int rxp_decoder_read_oggpage(rxp_decoder* decoder, ogg_page* page) {
     /* read a chunk of data */
     read = fread(buffer, 1, 4096, decoder->fp); 
     if (read == 0) {
-
+      
       decoder->state |= RXP_DEC_STATE_READY;
       decoder->state &= ~RXP_DEC_STATE_DECODING;
 
@@ -326,8 +345,8 @@ static int rxp_decoder_read_oggpage(rxp_decoder* decoder, ogg_page* page) {
 
     ntotal += read;
     r = ogg_sync_wrote(&decoder->sync_state, read);
+
     if (r != 0) {
-      printf("Error: ogg_sync_wrote() failed.\n");
       return -5;
     }
   }
@@ -430,7 +449,7 @@ static int rxp_decoder_decode_vorbis(rxp_decoder* decoder, rxp_stream* stream, o
     /* when all header packets read, init decoder */
     if (v->num_header_packets == 3) {
       
-      if (v->is_dsp_init == 1) {
+      if (v->is_dsp_init == 0xCAFEBABE) {
         printf("Info: looks like the dsp was already initialized. Ignoring this for now.\n");
       }
 
@@ -444,7 +463,7 @@ static int rxp_decoder_decode_vorbis(rxp_decoder* decoder, rxp_stream* stream, o
         return -3;
       }
 
-      v->is_dsp_init = 1;
+      v->is_dsp_init = 0xCAFEBABE;
 
       return rxp_decoder_set_audio_info(decoder, v->info.rate, v->info.channels);
     }
@@ -524,7 +543,6 @@ static int rxp_decoder_find_stream(rxp_decoder* decoder,
                                    ogg_page* page, 
                                    rxp_stream** stream) 
 {
-
   int r = 0;
   rxp_stream* s = *stream;
   int serial = ogg_page_serialno(page);
@@ -547,7 +565,6 @@ static int rxp_decoder_find_stream(rxp_decoder* decoder,
     }
 
     *stream = s;
-
     if (rxp_decoder_add_stream(decoder, *stream) < 0) {
       printf("Error: cannot add stream.\n");
       return -3;
