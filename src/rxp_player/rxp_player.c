@@ -138,13 +138,10 @@ int rxp_player_clear(rxp_player* player) {
     printf("Error: cannot shutdown the clock.\n");
     return -6;
   }
-  
-  if (player->audio_buffer.capacity > 0) {
-    printf("info: clearing the audio ringbuffer.\n");
-    if (rxp_ringbuffer_clear(&player->audio_buffer) < 0) {
-      printf("Error: cannot free the audio buffer.\n");
-      return -7;
-    }
+
+  if (rxp_ringbuffer_clear(&player->audio_buffer) < 0) {
+    printf("Error: cannot free the audio buffer.\n");
+    return -7;
   }
 
   if (rxp_player_get_state(player) != RXP_PSTATE_SHUTTING_DOWN) {

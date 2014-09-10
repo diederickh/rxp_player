@@ -112,7 +112,7 @@ int rxp_packet_queue_init(rxp_packet_queue* q) {
   if (!q) { return -1; } 
 
   if (0xCAFEBABE == q->is_init) {
-    printf("Error: trying to initialize a rxp_packet_queue which is already initialize.\n");
+    printf("Error: trying to initialize a rxp_packet_queue which is already initialized.\n");
     return -2;
   }
 

@@ -124,14 +124,15 @@ int rxp_ringbuffer_reset(rxp_ringbuffer* rb) {
 
 int rxp_ringbuffer_clear(rxp_ringbuffer* rb) {
   if (!rb) { return -1; } 
-  if (!rb->buffer) { return -2; } 
   
   if (0xCAFEBABE != rb->is_init) {
     printf("Info: ringbuffer not initialized so we're not clearing it. ignoring request.\n");
     return 0;
   }
-  printf("free! %d\n", rb->is_init);
-  free(rb->buffer);
+
+  if (NULL != rb->buffer) {
+    free(rb->buffer);
+  }
   rb->buffer = NULL;
   rb->capacity = 0;
   rb->is_init = 0xDEADBEEF;

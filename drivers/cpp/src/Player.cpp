@@ -41,7 +41,7 @@ namespace rxp {
 
     /* initialize the player. */
     if (0 != rxp_player_init(&ctx)) { 
-      printf("Error: cannot initialize the rxp_player.\n");
+      printf("Error: cannot initialize the rxp_player because rxp_player_init failed.\n");
       result = -1;
       goto error;
     }
